@@ -3,14 +3,12 @@ import { Smile, Frown, Meh, Angry, ArrowRight, MessageSquare, Bell, Search, LogO
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 
-// Import assets
 import bgHalo from "../assets/BackgroundHalo.png"
 import bgMood from "../assets/BackgroundMood.png"
 import bgBurnout from "../assets/BackgroundBurnout.png"
 import bgArt1 from "../assets/ArticleBackground.jpeg" 
 import bgArt2 from "../assets/ArticleBackground.jpeg"
 
-// chart
 import {
   Chart as ChartJS,
   LineElement,
@@ -31,11 +29,10 @@ const recommendedArticles = [
 function Home() {
   const navigate = useNavigate()
   
-  // State untuk Search Modal
+  
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-
-  // Daftar halaman untuk dicari
+  
   const pages = [
     { name: "Home / Beranda", path: "/" },
     { name: "Mood Tracker / Riwayat", path: "/mood" },
@@ -44,7 +41,6 @@ function Home() {
     { name: "Artikel Kesehatan", path: "/artikel" }
   ]
 
-  // Data Pesan Mood Dinamis
   const moodMessages = {
     "Bahagia": "Wah bagus! Pertahankan ya! ✨",
     "Senang": "Hari yang indah! Tetap bersyukur ya! 😊",

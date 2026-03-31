@@ -7,28 +7,26 @@ body {
   padding: 0;
   display: flex;
   justify-content: center;
-  background-color: #f0fdf4; /* Warna hijau muda SehatYuk */
+  background-color: #f0fdf4;
 }
 
 #root {
   width: 100%;
-  max-width: 420px; /* Standar Mobile */
+  max-width: 420px;
   background: white;
   min-height: 100vh;
-  min-height: 100dvh; /* Lebih akurat untuk browser mobile */
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); /* Tambahkan shadow halus */
+  min-height: 100dvh;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Tablet */
 @media (min-width: 768px) {
   #root {
     max-width: 768px;
   }
 }
 
-/* Laptop/Desktop */
 @media (min-width: 1024px) {
   #root {
-    max-width: 480px; /* Saran: Tetap buat ramping agar look-nya tetap 'Mobile App' di desktop */
+    max-width: 480px;
   }
 }

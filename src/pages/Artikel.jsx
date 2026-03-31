@@ -24,7 +24,7 @@ function Artikel() {
     style={{ backgroundImage: `url(${bgArticle})` }}
     >
 
-      <div className="min-h-screen backdrop-blur-md bg-white/30 p-6 pb-24">
+      <div className="bg-white/40 backdrop-blur-md p-4 rounded-3xl mb-4 border-white/30 shadow-md">
 
       <Navbar onSearchClick={handleSearchClick} />
 
