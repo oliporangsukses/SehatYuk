@@ -3,6 +3,7 @@ import { articles } from "../data/articles"
 import ArticleCard from "../components/ArticleCard"
 import Navbar from "../components/Navbar"
 import BottomNav from "../components/BottomNav"
+import bgArticle from "../assets/bgArticle.jpeg"
 
 function Artikel() {
   const [search, setSearch] = useState("")
@@ -18,7 +19,12 @@ function Artikel() {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen pb-24">
+    <div className=
+    "p-6 min-h-screen pb-24 bg-cover bg-center"
+    style={{ backgroundImage: `url(${bgArticle})` }}
+    >
+
+      <div className="min-h-screen backdrop-blur-md bg-white/30 p-6 pb-24">
 
       <Navbar onSearchClick={handleSearchClick} />
 
@@ -53,7 +59,7 @@ function Artikel() {
           </p>
         )}
       </div>
-
+     </div>
       <BottomNav />
 
     </div>
