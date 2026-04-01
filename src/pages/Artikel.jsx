@@ -14,44 +14,39 @@ function Artikel() {
   )
 
   const handleSearchClick = () => {
-    console.log("SEARCH DIKLIK")
     inputRef.current.focus()
   }
 
   return (
-    <div className=
-    "p-6 min-h-screen pb-24 bg-cover bg-center"
-    style={{ backgroundImage: `url(${bgArticle})` }}
+    <div
+      className="min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: `url(${bgArticle})` }}
     >
 
-      <div className="bg-white/40 backdrop-blur-md p-4 rounded-3xl mb-4 border-white/30 shadow-md">
 
-      <Navbar onSearchClick={handleSearchClick} />
+      <div className="min-h-screen backdrop-blur-md bg-white/30 p-6 pb-24">
 
-      <h1 className="text-xl font-semibold mb-4">
-        Artikel Kesehatan
-      </h1>
+        <Navbar onSearchClick={handleSearchClick} />
 
-      <div className="mb-5">
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2 rounded-full bg-gray-200 outline-none"
-        />
-      </div>
+        <h1 className="text-xl font-semibold mb-4 text-gray-800">
+          Artikel Kesehatan
+        </h1>
 
-      <div className="space-y-4">
+        <div className="mb-5">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full px-4 py-2 rounded-full bg-white/70 backdrop-blur-md outline-none"
+          />
+        </div>
+
+       <div className="space-y-4">
         {filteredArticles.length > 0 ? (
           filteredArticles.map((item) => (
-            <ArticleCard
-              key={item.id}
-              title={item.title}
-              desc={item.desc}
-              link={item.link}
-            />
+            <ArticleCard key={item.id} {...item} />
           ))
         ) : (
           <p className="text-gray-500 text-sm">
@@ -59,9 +54,10 @@ function Artikel() {
           </p>
         )}
       </div>
-     </div>
-      <BottomNav />
 
+        <BottomNav />
+
+      </div>
     </div>
   )
 }
