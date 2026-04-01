@@ -155,15 +155,31 @@ function Home() {
         </div>
       </div>
 
-      {/* Halo Section */}
-      <div className="p-5 rounded-3xl mb-4 flex justify-between items-center bg-cover bg-center shadow-sm"
-        style={{ backgroundImage: `url(${bgHalo})` }}>
-        <div className="text-left">
-          <h2 className="font-semibold text-lg text-green-900">Halo, {userName} 👋</h2>
-          <p className="text-sm text-green-700">Bagaimana perasaanmu hari ini?</p>
-        </div>
-      </div>
+      {/* Halo Section - Gambar Tajam & Teks Jelas Terbaca */}
+<div 
+  className="p-5 rounded-3xl mb-4 flex justify-between items-center shadow-sm relative overflow-hidden h-[130px]"
+  /* Menggunakan bg-right & bg-cover agar gambar menyesuaikan card dan si kartun tidak terpotong */
+  style={{ 
+    backgroundImage: `url(${bgHalo})`, 
+    backgroundSize: 'cover', 
+    backgroundPosition: 'right' 
+  }}
+>
+  {/* 1. KITA HAPUS OVERLAY PUTIH & BLUR DI SINI */}
+  {/* Latar belakang watercolor aslimu sekarang 100% tajam dan bersih */}
 
+  {/* 2. Kotak Teks Sage dibuat LEBIH SOLID (bg-white/90) agar teks kontras maksimal */}
+  <div className="relative z-10 text-left bg-white/90 p-4 rounded-2xl border border-white/50 shadow-md max-w-[65%]">
+    {/* Gunakan Sage Tua (#5F7161) agar kontras maksimal */}
+    <h2 className="font-extrabold text-lg text-[#5F7161]">
+      Halo, {userName} 👋
+    </h2>
+    {/* Gunakan Sage Medium (#7A9D82) untuk sub-teks agar tetap lembut */}
+    <p className="text-xs font-bold text-[#7A9D82]">
+      Bagaimana perasaanmu hari ini?
+    </p>
+  </div>
+</div>
       {/* Mood Status */}
       <div className="rounded-2xl p-4 mb-4 shadow-sm border border-white/50"
         style={{ backgroundImage: `url(${bgMood})`, backgroundSize: "cover", backgroundPosition: "center" }}>
