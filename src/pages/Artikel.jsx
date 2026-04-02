@@ -11,7 +11,6 @@ import bgMoodPage from "../assets/MoodBackground.jpeg"
 function Artikel() {
   const navigate = useNavigate()
   const [search, setSearch] = useState("")
-  // Variabel isSearchOpen sudah dihapus karena tidak digunakan di sini
   const inputRef = useRef(null)
 
   // Pastikan user sudah login
@@ -33,83 +32,90 @@ function Artikel() {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-fixed relative flex flex-col font-sans"
+      className="min-h-screen bg-cover bg-center bg-fixed relative flex flex-col font-sans transition-colors duration-500"
       style={{ backgroundImage: `url(${bgMoodPage})` }}
     >
-      {/* HEADER SECTION - Konsisten dengan Home & Mood */}
-      <header className="flex justify-between items-center p-4 pt-6 z-20 sticky top-0 bg-white/10 backdrop-blur-sm">
-        <div className="flex items-center gap-1 cursor-pointer group" onClick={() => navigate("/")}>
-          <span className="text-2xl group-hover:rotate-12 transition-transform">🌿</span>
-          <h1 className="text-xl font-black text-green-700 tracking-tight">SehatYuk</h1>
-        </div>
+      {/* Overlay Gelap untuk Dark Mode */}
+      <div className="min-h-screen bg-white/10 dark:bg-black/60 transition-colors duration-500">
         
-        <div className="flex items-center gap-3">
-          <MessageSquare className="text-green-800/60 cursor-pointer hover:text-green-600" size={20} onClick={() => navigate("/mood")} />
-          <Bell className="text-green-800/60 cursor-pointer hover:text-green-600" size={20} />
-          {/* Klik ikon search langsung fokus ke input bawah */}
-          <Search className="text-green-800/60 cursor-pointer hover:text-green-600" size={20} onClick={() => inputRef.current?.focus()} />
-          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center border border-white/50 shadow-sm cursor-pointer" onClick={() => navigate("/profile")}>
-              <User size={16} className="text-green-700" />
+        {/* HEADER SECTION */}
+        <header className="flex justify-between items-center p-4 pt-6 z-20 sticky top-0 bg-white/10 dark:bg-black/20 backdrop-blur-sm border-b border-white/10">
+          <div className="flex items-center gap-1 cursor-pointer group" onClick={() => navigate("/")}>
+            <span className="text-2xl group-hover:rotate-12 transition-transform">🌿</span>
+            <h1 className="text-xl font-black text-green-700 dark:text-green-400 tracking-tight">SehatYuk</h1>
           </div>
-          <LogOut className="text-red-500/60 cursor-pointer hover:text-red-600 ml-1" size={20} onClick={handleLogout} />
-        </div>
-      </header>
-
-      {/* Konten Utama */}
-      <div className="min-h-screen backdrop-blur-md bg-white/20 p-5 pb-28">
-        
-        {/* Judul Halaman */}
-        <div className="mt-4 mb-6 px-2">
-           <h3 className="font-black text-[10px] text-green-900/50 uppercase tracking-widest mb-1">
-             Edukasi Kesehatan
-           </h3>
-           <h1 className="text-2xl font-black text-green-800 tracking-tight">
-             Artikel Kesehatan
-           </h1>
-        </div>
-
-        {/* Search Bar - Style SehatYuk */}
-        <div className="mb-8 px-1">
-          <div className="relative flex items-center">
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Cari artikel..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-6 py-4 rounded-[25px] bg-white/80 backdrop-blur-lg border border-white/50 outline-none text-sm text-green-900 placeholder:text-green-700/50 shadow-lg focus:ring-2 focus:ring-green-400/30 transition-all"
-            />
-            <div className="absolute left-5 text-green-600/60">
-              <Search size={18} strokeWidth={3} />
+          
+          <div className="flex items-center gap-3">
+            <MessageSquare className="text-green-800/60 dark:text-green-300/60 cursor-pointer hover:text-green-600" size={20} onClick={() => navigate("/mood")} />
+            <Bell className="text-green-800/60 dark:text-green-300/60 cursor-pointer hover:text-green-600" size={20} />
+            <Search className="text-green-800/60 dark:text-green-300/60 cursor-pointer hover:text-green-600" size={20} onClick={() => inputRef.current?.focus()} />
+            
+            <div 
+              onClick={() => navigate("/profile")}
+              className="w-8 h-8 rounded-full bg-green-100 dark:bg-slate-800 flex items-center justify-center border border-white/50 dark:border-slate-700 shadow-sm cursor-pointer hover:bg-green-200 transition-all"
+            >
+                <User size={16} className="text-green-700 dark:text-green-400" />
             </div>
-            {search && (
-              <X 
-                size={18} 
-                className="absolute right-5 text-red-400 cursor-pointer hover:text-red-600" 
-                onClick={() => setSearch("")} 
+            <LogOut className="text-red-500/60 cursor-pointer hover:text-red-600 ml-1" size={20} onClick={handleLogout} />
+          </div>
+        </header>
+
+        {/* Konten Utama */}
+        <div className="p-5 pb-28">
+          
+          {/* Judul Halaman */}
+          <div className="mt-4 mb-6 px-2">
+             <h3 className="font-black text-[10px] text-green-900/50 dark:text-slate-400 uppercase tracking-widest mb-1">
+               Edukasi Kesehatan
+             </h3>
+             <h1 className="text-2xl font-black text-green-800 dark:text-white tracking-tight">
+               Artikel Kesehatan
+             </h1>
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-8 px-1">
+            <div className="relative flex items-center">
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Cari artikel..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-12 pr-6 py-4 rounded-[25px] bg-white/80 dark:bg-slate-900/90 backdrop-blur-lg border border-white/50 dark:border-slate-700 outline-none text-sm text-green-900 dark:text-white placeholder:text-green-700/50 dark:placeholder:text-slate-500 shadow-lg focus:ring-2 focus:ring-green-400/30 transition-all"
               />
+              <div className="absolute left-5 text-green-600/60 dark:text-green-400/60">
+                <Search size={18} strokeWidth={3} />
+              </div>
+              {search && (
+                <X 
+                  size={18} 
+                  className="absolute right-5 text-red-400 cursor-pointer hover:text-red-600" 
+                  onClick={() => setSearch("")} 
+                />
+              )}
+            </div>
+          </div>
+
+          {/* List Artikel */}
+          <div className="space-y-6">
+            {filteredArticles.length > 0 ? (
+              filteredArticles.map((item) => (
+                <div key={item.id} className="transition-all hover:scale-[1.01] active:scale-[0.98]">
+                  <ArticleCard {...item} />
+                </div>
+              ))
+            ) : (
+              <div className="p-10 text-center bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-[35px] border border-white/50 dark:border-slate-700 transition-colors">
+                <span className="text-4xl mb-3 block">😢</span>
+                <p className="text-green-800 dark:text-slate-300 font-bold text-sm">Artikel tidak ditemukan</p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* List Artikel */}
-        <div className="space-y-6">
-          {filteredArticles.length > 0 ? (
-            filteredArticles.map((item) => (
-              <div key={item.id} className="transition-all hover:scale-[1.01] active:scale-[0.98]">
-                <ArticleCard {...item} />
-              </div>
-            ))
-          ) : (
-            <div className="p-10 text-center bg-white/40 backdrop-blur-md rounded-[35px] border border-white/50">
-              <span className="text-4xl mb-3 block">😢</span>
-              <p className="text-green-800 font-bold text-sm">Artikel tidak ditemukan</p>
-            </div>
-          )}
-        </div>
+        <BottomNav />
       </div>
-
-      <BottomNav />
     </div>
   )
 }
