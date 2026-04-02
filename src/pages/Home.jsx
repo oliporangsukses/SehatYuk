@@ -1,13 +1,14 @@
 import BottomNav from "../components/BottomNav"
-import { Smile, Frown, Meh, Angry, ArrowRight, MessageSquare, Bell, Search, LogOut, X } from "lucide-react"
+import { Smile, Frown, Meh, Angry, ArrowRight, MessageSquare, Search, LogOut, X, User } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 
 import bgHalo from "../assets/BackgroundHalo.png"
 import bgMood from "../assets/BackgroundMood.png"
 import bgBurnout from "../assets/BackgroundBurnout.png"
-import bgArt1 from "../assets/ArticleBackground.jpeg" 
-import bgArt2 from "../assets/ArticleBackground.jpeg"
+import bgArt1 from "../assets/BackgroundArtikel1.png" 
+import bgArt2 from "../assets/BackgroundArtikel2.png"
+import bgMoodPage from "../assets/MoodBackground.jpeg" 
 
 import {
   Chart as ChartJS,
@@ -16,10 +17,11 @@ import {
   LinearScale,
   PointElement,
   Filler,
+  Tooltip,
 } from "chart.js"
 import { Line } from "react-chartjs-2"
 
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Filler)
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Filler, Tooltip)
 
 const recommendedArticles = [
   { id: 1, title: "Cara Mengatasi Stres", desc: "Tips sederhana untuk mengurangi stres.", bgImage: bgArt1 },
@@ -28,16 +30,76 @@ const recommendedArticles = [
 
 function Home() {
   const navigate = useNavigate()
-  
-  
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  
+  const [userName] = useState(() => localStorage.getItem("userName") || "Pengguna")
+
+  // --- HELPER: AMBIL TANGGAL HARI INI (Format YYYY-MM-DD) ---
+  const getTodayStr = () => new Date().toISOString().split('T')[0];
+
+  // --- HELPER: AMBIL LABEL 7 HARI TERAKHIR ---
+  const getLastSevenDaysLabels = () => {
+    const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+    const labels = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      labels.push(days[d.getDay()]);
+    }
+    return labels;
+  };
+
+  // --- LOGIC STATISTIK AKURAT (BERDASARKAN KALENDER) ---
+  const [moodData, setMoodData] = useState(() => {
+    const savedMoods = JSON.parse(localStorage.getItem("user_moods_v3") || "{}");
+    const dataPoints = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const ds = d.toISOString().split('T')[0];
+      // Jika tidak ada data, kasih nilai 3 (Netral) agar grafik tidak putus
+      dataPoints.push(savedMoods[ds] || 3);
+    }
+    return dataPoints;
+  });
+
+  const [currentMoodText, setCurrentMoodText] = useState(() => {
+    const today = getTodayStr();
+    const savedMoods = JSON.parse(localStorage.getItem("user_moods_v3") || "{}");
+    const latestScore = savedMoods[today];
+    
+    if (latestScore) {
+      const map = { 5: "Bahagia", 4: "Senang", 3: "Netral", 2: "Sedih", 1: "Marah" };
+      return map[latestScore] || "Belum diisi";
+    }
+    return "Belum diisi";
+  });
+
+  const handleMoodSelection = (label, score) => {
+    setCurrentMoodText(label);
+    const today = getTodayStr();
+    const savedMoods = JSON.parse(localStorage.getItem("user_moods_v3") || "{}");
+    
+    // Simpan score terbaru untuk hari ini
+    savedMoods[today] = score;
+    localStorage.setItem("user_moods_v3", JSON.stringify(savedMoods));
+
+    // Update state grafik secara instan
+    const updatedPoints = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const ds = d.toISOString().split('T')[0];
+      updatedPoints.push(savedMoods[ds] || 3);
+    }
+    setMoodData(updatedPoints);
+  };
+
   const pages = [
-    { name: "Home / Beranda", path: "/" },
-    { name: "Mood Tracker / Riwayat", path: "/mood" },
+    { name: "Beranda", path: "/" },
+    { name: "Riwayat Mood", path: "/mood" },
     { name: "Tes Burnout", path: "/burnout" },
-    { name: "Profile / Pengaturan", path: "/profile" },
+    { name: "Profil Saya", path: "/profile" },
     { name: "Artikel Kesehatan", path: "/artikel" }
   ]
 
@@ -50,222 +112,213 @@ function Home() {
     "Belum diisi": "Yuk, catat perasaanmu hari ini!"
   };
 
-  const filteredPages = pages.filter(page => 
-    page.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const [userName] = useState(() => localStorage.getItem("userName") || "Pengguna")
-  
-  const [moodData, setMoodData] = useState(() => {
-    const saved = localStorage.getItem("user_moods")
-    return saved ? JSON.parse(saved).slice(-7) : [3, 3, 3, 3, 3, 3, 3]
-  })
-
-  const [currentMoodText, setCurrentMoodText] = useState(() => {
-    const saved = localStorage.getItem("user_moods")
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      const latestScore = parsed[parsed.length - 1]
-      const moodMap = { 5: "Bahagia", 4: "Senang", 3: "Netral", 2: "Sedih", 1: "Marah" }
-      return moodMap[latestScore] || "Netral"
-    }
-    return "Belum diisi"
-  })
-
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn")
-    if (!isLoggedIn) {
-      navigate("/login")
-    }
+    if (!localStorage.getItem("isLoggedIn")) navigate("/login")
   }, [navigate])
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn")
-    navigate("/login")
-  }
-
-  const handleMoodSelection = (label, score) => {
-    setCurrentMoodText(label)
-    const savedMoods = localStorage.getItem("user_moods")
-    let allMoods = savedMoods ? JSON.parse(savedMoods) : [3, 3, 3, 3, 3, 3] 
-    const updatedMoods = [...allMoods, score].slice(-7)
-    localStorage.setItem("user_moods", JSON.stringify(updatedMoods))
-    setMoodData(updatedMoods)
-  }
-
   const getMoodEmoji = () => {
-    switch (currentMoodText) {
-      case "Bahagia": return "😊";
-      case "Senang": return "😊";
-      case "Marah": return "😡";
-      case "Sedih": return "😢";
-      case "Netral": return "😐";
-      default: return "❓"; 
-    }
+    const map = { "Bahagia": "😊", "Senang": "🙂", "Marah": "😡", "Sedih": "😢", "Netral": "😐" }
+    return map[currentMoodText] || "❓"
   }
 
   return (
-    <div className="p-4 bg-[#F4FBF8] min-h-screen pb-24 relative font-sans text-left">
+    <div className="min-h-screen pb-28 bg-cover bg-center bg-fixed relative flex flex-col font-sans"
+      style={{ backgroundImage: `url(${bgMoodPage})` }}>
       
-      {/* SEARCH MODAL OVERLAY */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm p-6 flex justify-center items-start pt-20">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-xl overflow-hidden">
-            <div className="p-4 border-b flex items-center gap-3">
-              <Search className="text-gray-400" size={20} />
-              <input 
-                autoFocus
-                type="text" 
-                placeholder="Cari fitur..."
-                className="flex-1 outline-none text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <X className="text-gray-400 cursor-pointer" size={20} onClick={() => {setIsSearchOpen(false); setSearchQuery("")}} />
-            </div>
-            <div className="p-2 max-h-60 overflow-y-auto">
-              {filteredPages.length > 0 ? filteredPages.map((page, index) => (
-                <div 
-                  key={index}
-                  onClick={() => {
-                    navigate(page.path)
-                    setIsSearchOpen(false)
-                  }}
-                  className="p-3 hover:bg-green-50 rounded-xl cursor-pointer text-sm text-gray-700 flex justify-between items-center"
-                >
-                  {page.name}
-                  <ArrowRight size={14} className="text-green-500" />
-                </div>
-              )) : (
-                <p className="p-4 text-center text-xs text-gray-400">Fitur tidak ditemukan...</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* HEADER SECTION */}
-      <div className="flex justify-between items-center mb-6 px-2 pt-2">
-        <h1 className="text-xl font-bold text-green-600">SehatYuk</h1>
-        <div className="flex items-center gap-4">
-          <MessageSquare className="text-green-800/60 cursor-pointer hover:text-green-800" size={22} onClick={() => navigate("/mood")} />
-          <Bell className="text-green-800/60 cursor-pointer hover:text-green-800" size={22} />
-          <Search className="text-green-800/60 cursor-pointer hover:text-green-800" size={22} onClick={() => setIsSearchOpen(true)} />
-          <LogOut className="text-red-500/70 cursor-pointer hover:text-red-600" size={22} onClick={handleLogout} />
-        </div>
-      </div>
-
-      {/* Halo Section */}
-      <div className="p-5 rounded-3xl mb-4 flex justify-between items-center bg-cover bg-center shadow-sm"
-        style={{ backgroundImage: `url(${bgHalo})` }}>
-        <div className="text-left">
-          <h2 className="font-semibold text-lg text-green-900">Halo, {userName} 👋</h2>
-          <p className="text-sm text-green-700">Bagaimana perasaanmu hari ini?</p>
-        </div>
-      </div>
-
-      {/* Mood Status */}
-      <div className="rounded-2xl p-4 mb-4 shadow-sm border border-white/50"
-        style={{ backgroundImage: `url(${bgMood})`, backgroundSize: "cover", backgroundPosition: "center" }}>
-        <div className="flex justify-between items-center">
-          <div className="text-left">
-            <p className="text-sm text-gray-600 font-medium text-left">Mood Kamu Hari Ini</p>
-            {/* Bagian teks yang jadi dinamis sesuai moodMessages */}
-            <p className="text-[10px] font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full inline-block mt-1">
-              {moodMessages[currentMoodText]}
-            </p>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-4xl mb-1">{getMoodEmoji()}</span>
-            <div className="flex items-center gap-1">
-              <span className="font-bold text-sm text-green-800">{currentMoodText}</span>
-              <span className="text-green-800">➜</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid Tracker & Burnout */}
-      <div className="grid grid-cols-2 gap-4 mb-5">
-        <div className="bg-white p-3 rounded-3xl shadow-sm border border-gray-50 flex flex-col justify-between">
-          <h4 className="text-[10px] font-bold mb-3 text-gray-400 uppercase tracking-wider text-left">Mood Tracker</h4>
-          <div className="flex justify-between text-center text-[10px]">
-            <div onClick={() => handleMoodSelection("Bahagia", 5)} className="cursor-pointer active:scale-90 transition-transform">
-              <Smile className="mx-auto text-yellow-500 mb-1" size={24}/> bahagia
-            </div>
-            <div onClick={() => handleMoodSelection("Marah", 1)} className="cursor-pointer active:scale-90 transition-transform">
-              <Angry className="mx-auto text-red-500 mb-1" size={24}/> marah
-            </div>
-            <div onClick={() => handleMoodSelection("Netral", 3)} className="cursor-pointer active:scale-90 transition-transform">
-              <Meh className="mx-auto text-green-500 mb-1" size={24}/> netral
-            </div>
-            <div onClick={() => handleMoodSelection("Sedih", 2)} className="cursor-pointer active:scale-90 transition-transform">
-              <Frown className="mx-auto text-blue-500 mb-1" size={24}/> sedih
-            </div>
-          </div>
-        </div>
-
-        <div className="p-3 rounded-3xl shadow-sm flex flex-col justify-between bg-cover bg-center border border-gray-50 text-left"
-          style={{ backgroundImage: `url(${bgBurnout})` }}>
-          <div>
-            <h4 className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">Tes Burnout</h4>
-            <p className="text-[10px] text-gray-500 mt-1 leading-tight font-medium">Ukur tingkat lelahmu.</p>
-          </div>
-          <button onClick={() => navigate("/burnout")} className="bg-white px-3 py-1 rounded-full text-[10px] mt-2 self-start shadow-sm font-bold text-green-600 active:scale-95 transition-transform">+ Mulai Tes</button>
-        </div>
-      </div>
-
-      {/* Riwayat Mood */}
-      <div className="p-4 rounded-3xl shadow-sm bg-white border border-gray-50 mb-8">
-        <h3 className="font-bold text-sm text-gray-700 mb-3 text-left">Riwayat Mood</h3>
-        <div className="h-44">
-          <Line data={{
-            labels: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
-            datasets: [{ 
-              label: "Mood", 
-              data: moodData, 
-              fill: true, 
-              backgroundColor: "rgba(74, 222, 128, 0.1)", 
-              tension: 0.4, 
-              borderColor: "#4ADE80", 
-              pointBackgroundColor: "#4ADE80", 
-              pointRadius: 5 
-            }]
-          }} options={{ 
-            scales: { y: { min: 1, max: 5, ticks: { stepSize: 1 } } }, 
-            maintainAspectRatio: false 
-          }} />
-        </div>
-      </div>
-
-      {/* Rekomendasi Artikel */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-5 px-1">
-          <h3 className="font-bold text-sm text-gray-700">Rekomendasi Artikel</h3>
-          <button onClick={() => navigate("/artikel")} className="text-[10px] text-green-600 font-bold hover:underline">Lihat Semua →</button>
-        </div>
+      <div className="min-h-screen bg-white/10 dark:bg-black/60 transition-colors duration-500">
         
-        <div className="flex flex-col gap-6">
-          {recommendedArticles.map((article) => (
-            <div 
-              key={article.id} 
-              onClick={() => navigate("/artikel")} 
-              className="relative p-6 rounded-[32px] shadow-md bg-cover bg-center border border-white transition-all duration-300 cursor-pointer flex justify-between items-center min-h-[120px] hover:scale-[1.02] active:scale-[0.98] group"
-              style={{ backgroundImage: `url(${article.bgImage})` }}
-            >
-              <div className="absolute inset-0 bg-black/5 rounded-[32px] group-hover:bg-black/10 transition-colors"></div>
-              <div className="relative flex-1 pr-4 bg-white/70 backdrop-blur-[4px] p-4 rounded-2xl shadow-sm border border-white/50 text-left"> 
-                <h4 className="font-bold text-sm text-green-900 mb-1">{article.title}</h4>
-                <p className="text-[11px] text-green-800 font-medium line-clamp-2 leading-tight">{article.desc}</p>
+        {/* SEARCH MODAL */}
+        {isSearchOpen && (
+          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm p-6 flex justify-center items-start pt-20">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[30px] shadow-2xl overflow-hidden border border-white/20">
+              <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex items-center gap-3">
+                <Search className="text-green-600" size={20} />
+                <input 
+                  autoFocus
+                  type="text" 
+                  placeholder="Cari fitur..."
+                  className="flex-1 bg-transparent outline-none text-sm text-green-900 dark:text-white"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <X className="text-gray-400 cursor-pointer" size={20} onClick={() => {setIsSearchOpen(false); setSearchQuery("")}} />
               </div>
-              <div className="relative p-3 rounded-full bg-white shadow-lg text-green-600 ml-3 shrink-0">
-                <ArrowRight size={20} />
+              <div className="p-2 max-h-60 overflow-y-auto">
+                {pages.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((page, index) => (
+                  <div key={index} onClick={() => { navigate(page.path); setIsSearchOpen(false); }}
+                    className="p-4 hover:bg-green-50 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-sm text-green-800 dark:text-slate-200"
+                  >
+                    {page.name}
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* HEADER */}
+        <header className="flex justify-between items-center p-4 pt-6 z-20 sticky top-0 bg-white/10 backdrop-blur-sm border-b border-white/10">
+          <div className="flex items-center gap-1 cursor-pointer" onClick={() => navigate("/")}>
+            <span className="text-2xl">🌿</span>
+            <h1 className="text-xl font-black text-green-700 dark:text-green-400 tracking-tight">SehatYuk</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <MessageSquare className="text-green-800/60 dark:text-green-300/60" size={20} onClick={() => navigate("/mood")} />
+            <Search className="text-green-800/60 dark:text-green-300/60" size={20} onClick={() => setIsSearchOpen(true)} />
+            <div onClick={() => navigate("/profile")} className="w-8 h-8 rounded-full bg-green-100 dark:bg-slate-800 flex items-center justify-center border border-white/50 cursor-pointer">
+                <User size={16} className="text-green-700 dark:text-green-400" />
+            </div>
+            <LogOut className="text-red-500/60" size={20} onClick={() => { localStorage.removeItem("isLoggedIn"); navigate("/login"); }} />
+          </div>
+        </header>
+
+        <div className="p-5 flex-1">
+          {/*  HALO SECTION */}
+          <div 
+            className="p-5 rounded-[35px] mb-4 flex justify-between items-center shadow-lg relative overflow-hidden h-[130px] border border-white/40 dark:border-slate-700"
+            style={{ 
+              backgroundImage: `url(${bgHalo})`, 
+              backgroundSize: 'cover', 
+              backgroundPosition: 'right' 
+            }}
+          >
+            <div className="relative z-10 text-left bg-white/90 dark:bg-slate-900/90 p-4 rounded-2xl border border-white/50 dark:border-slate-700 shadow-md max-w-[65%] transition-colors duration-500">
+              <h2 className="font-extrabold text-lg text-[#5F7161] dark:text-green-400 leading-tight">
+                Halo, {userName} 👋
+              </h2>
+              <p className="text-xs font-bold text-[#7A9D82] dark:text-slate-300">
+                Bagaimana perasaanmu hari ini?
+              </p>
+            </div>
+          </div>
+
+          {/* MOOD STATUS */}
+          <div className="p-6 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-gradient-to-br from-white/70 to-green-50/50 dark:from-slate-900/80 dark:to-slate-950/80 backdrop-blur-md mb-4 overflow-hidden relative"
+            style={{ backgroundImage: `url(${bgMood})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+            <div className="absolute inset-0 bg-white/20 dark:bg-black/40"></div>
+            <div className="flex justify-between items-center relative z-10">
+              <div className="text-left">
+                <p className="text-xs text-green-900 dark:text-green-300 font-bold uppercase tracking-wider">Mood Kamu Hari Ini</p>
+                <p className="text-[10px] font-bold text-green-700 dark:text-green-400 bg-white/60 dark:bg-black/50 px-3 py-1 rounded-full inline-block mt-2 shadow-sm border border-white/50 dark:border-slate-700">
+                  {moodMessages[currentMoodText]}
+                </p>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-4xl drop-shadow-md">{getMoodEmoji()}</span>
+                <div className="flex items-center gap-1 mt-1 bg-green-600/10 dark:bg-green-400/20 px-2 py-0.5 rounded-lg">
+                  <span className="font-black text-xs text-green-800 dark:text-green-400 uppercase">{currentMoodText}</span>
+                  <ArrowRight size={12} className="text-green-800 dark:text-green-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+{/* Grid Tracker & Burnout */}
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            <div className="p-4 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md flex flex-col justify-between">
+              <h4 className="text-[10px] font-black mb-3 text-green-800/50 dark:text-white/40 uppercase tracking-widest text-left font-bold">Catat Mood</h4>
+              <div className="grid grid-cols-5 gap-1 text-center">
+                
+                {/* Bahagia */}
+                <div onClick={() => handleMoodSelection("Bahagia", 5)} className="cursor-pointer hover:scale-110 active:scale-90 transition-transform">
+                  <Smile className="mx-auto text-yellow-500" size={18}/>
+                  <p className="text-[7px] font-bold text-green-900 dark:text-slate-200 mt-1">Bahagia</p>
+                </div>
+
+                {/* Senang */}
+                <div onClick={() => handleMoodSelection("Senang", 4)} className="cursor-pointer hover:scale-110 active:scale-90 transition-transform">
+                  <Smile className="mx-auto text-orange-400" size={18}/>
+                  <p className="text-[7px] font-bold text-green-900 dark:text-slate-200 mt-1">Senang</p>
+                </div>
+
+                {/* Netral */}
+                <div onClick={() => handleMoodSelection("Netral", 3)} className="cursor-pointer hover:scale-110 active:scale-90 transition-transform">
+                  <Meh className="mx-auto text-green-500" size={18}/>
+                  <p className="text-[7px] font-bold text-green-900 dark:text-slate-200 mt-1">Netral</p>
+                </div>
+
+                {/* Sedih */}
+                <div onClick={() => handleMoodSelection("Sedih", 2)} className="cursor-pointer hover:scale-110 active:scale-90 transition-transform">
+                  <Frown className="mx-auto text-blue-400" size={18}/>
+                  <p className="text-[7px] font-bold text-green-900 dark:text-slate-200 mt-1">Sedih</p>
+                </div>
+
+                {/* Marah */}
+                <div onClick={() => handleMoodSelection("Marah", 1)} className="cursor-pointer hover:scale-110 active:scale-90 transition-transform">
+                  <Angry className="mx-auto text-red-400" size={18}/>
+                  <p className="text-[7px] font-bold text-green-900 dark:text-slate-200 mt-1">Marah</p>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="p-4 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-cover bg-center flex flex-col justify-between relative overflow-hidden"
+              style={{ backgroundImage: `url(${bgBurnout})` }}>
+              <div className="absolute inset-0 bg-white/20 dark:bg-black/50"></div>
+              <div className="relative z-10 text-left">
+                <h4 className="text-[10px] font-black text-green-900/50 dark:text-white/60 uppercase tracking-widest text-left">Tes Burnout</h4>
+                <p className="text-[9px] text-green-800 dark:text-slate-200 mt-1 font-bold">Ukur tingkat lelahmu.</p>
+              </div>
+              <button onClick={() => navigate("/burnout")} className="relative z-10 bg-green-600 text-white px-4 py-1.5 rounded-full text-[10px] mt-2 self-start shadow-md font-black hover:bg-green-700 transition-all">
+                + MULAI TES
+              </button>
+            </div>
+          </div>
+
+          {/* Chart Section (100% AKURAT) */}
+          <div className="p-6 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md mb-8">
+            <h3 className="font-black text-[10px] text-green-900/50 dark:text-white/40 uppercase tracking-widest mb-4 text-left">Progress Minggu Ini</h3>
+            <div className="h-44">
+              <Line 
+                data={{
+                  labels: getLastSevenDaysLabels(), // Label Hari Dinamis
+                  datasets: [{ 
+                    data: moodData, // Data per tanggal
+                    fill: true, 
+                    backgroundColor: "rgba(22, 163, 74, 0.1)", 
+                    tension: 0.4, 
+                    borderColor: "#16a34a", 
+                    borderWidth: 3,
+                    pointBackgroundColor: "#ffffff", 
+                    pointBorderColor: "#16a34a", 
+                    pointBorderWidth: 2, 
+                    pointRadius: 4 
+                  }]
+                }} 
+                options={{ 
+                  scales: { 
+                    y: { min: 1, max: 5, ticks: { stepSize: 1, color: "#16a34a" }, grid: { color: "rgba(22, 163, 74, 0.05)" } },
+                    x: { ticks: { color: "#16a34a", font: { weight: 'bold' } }, grid: { display: false } }
+                  }, 
+                  plugins: { legend: { display: false } }, 
+                  maintainAspectRatio: false 
+                }} 
+              />
+            </div>
+          </div>
+
+          {/* Artikel */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="font-black text-[10px] text-green-900/50 dark:text-white/40 uppercase tracking-widest text-left">Rekomendasi Artikel</h3>
+              <button onClick={() => navigate("/artikel")} className="text-[10px] text-green-600 font-black hover:underline tracking-tighter">LIHAT SEMUA →</button>
+            </div>
+            <div className="flex flex-col gap-6">
+              {recommendedArticles.map((article) => (
+                <div key={article.id} onClick={() => navigate("/artikel")} className="relative p-6 rounded-[35px] shadow-lg bg-cover bg-center border border-white/40 dark:border-slate-700 transition-all flex justify-between items-center min-h-[130px] hover:scale-[1.02] active:scale-[0.98] group overflow-hidden"
+                  style={{ backgroundImage: `url(${article.bgImage})` }}>
+                  <div className="absolute inset-0 bg-white/10 dark:bg-black/30 group-hover:bg-transparent transition-colors"></div>
+                  <div className="relative flex-1 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md p-4 rounded-[25px] text-left border border-white/50"> 
+                    <h4 className="font-black text-sm text-green-900 dark:text-green-400 mb-1 leading-tight">{article.title}</h4>
+                    <p className="text-[10px] text-green-800 dark:text-slate-300 font-bold opacity-70">{article.desc}</p>
+                  </div>
+                  <div className="relative p-3 rounded-2xl bg-green-600 shadow-lg text-white ml-3 shrink-0"><ArrowRight size={18} /></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-
       <BottomNav />
     </div>
   )

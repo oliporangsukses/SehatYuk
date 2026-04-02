@@ -21,9 +21,9 @@ function Navbar({ onSearchClick }) {
 
       {/* Logo */}
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 bg-green-400 rounded-full"></div>
+  
         <h1 className="font-semibold text-green-600">
-          SehatYuk
+          🌿 SehatYuk
         </h1>
       </div>
 
