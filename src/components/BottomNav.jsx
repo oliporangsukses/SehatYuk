@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom"
 import { Home, Smile, Flame, BookOpen, User } from "lucide-react"
+import bg from "../assets/BackgroundMood.png"
 
 function BottomNav() {
   return (
-    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 w-[90%] bg-white rounded-2xl shadow-lg flex justify-around py-3">
+     <div
+      className="fixed bottom-3 left-1/2 -translate-x-1/2 w-[90%] rounded-2xl shadow-lg flex justify-around py-3 bg-cover bg-center"
+      style={{ backgroundImage: `url(${bg})` }}
+    >
 
-      <Link to="/" className="flex flex-col items-center text-green-600">
+      <Link to="/" className="flex flex-col items-center text-gray-600">
         <Home size={22}/>
         <span className="text-xs">Beranda</span>
       </Link>
