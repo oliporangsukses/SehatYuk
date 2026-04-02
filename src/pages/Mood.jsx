@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import BottomNav from "../components/BottomNav"
-// Menggunakan MoodBackground sebagai background utama
 import bgMoodPage from "../assets/MoodBackground.jpeg" 
 import {
   Chart as ChartJS,
@@ -91,7 +90,6 @@ function Mood() {
   }
 
   return (
-    // BACKGROUND UTAMA MENGGUNAKAN MoodBackground.png
     <div className="p-5 min-h-screen pb-28 bg-cover bg-center bg-fixed"
       style={{ backgroundImage: `url(${bgMoodPage})` }}>
       
@@ -100,7 +98,6 @@ function Mood() {
         <p className="text-xs text-green-700 font-medium italic">Simpan memorimu hari ini...</p>
       </div>
       
-      {/* CARD INPUT: Gradasi Glassmorphism menyesuaikan background */}
       <div className="p-6 rounded-[35px] shadow-lg border border-white/40 bg-gradient-to-br from-white/70 to-green-50/50 backdrop-blur-md mb-6">
         <div className="flex justify-between mb-6 px-2">
           {[5, 4, 3, 2, 1].map((s) => (
@@ -146,7 +143,6 @@ function Mood() {
         </div>
       </div>
 
-      {/* CARD STATISTIK */}
       <div className="p-6 rounded-[35px] shadow-lg border border-white/40 bg-gradient-to-br from-white/70 to-green-50/50 backdrop-blur-md mb-4">
         <h3 className="font-bold text-green-900 mb-4 text-sm text-left px-1">Statistik Mingguan</h3>
         <div className="h-44">

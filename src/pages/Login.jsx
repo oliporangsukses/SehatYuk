@@ -12,12 +12,8 @@ function Login(){
   const handleLogin = (e) => {
     e.preventDefault()
 
-    // LOGIKA PENYIMPANAN DATA USER
-    // Nanti jika sudah pakai API, ambil 'name' dari response backend
-    // Untuk sekarang, kita ambil bagian depan email sebagai nama
     const detectedName = email.split('@')[0] || "User"
     
-    // Simpan ke localStorage agar bisa dibaca oleh komponen Home
     localStorage.setItem("userName", detectedName)
     localStorage.setItem("isLoggedIn", "true")
 

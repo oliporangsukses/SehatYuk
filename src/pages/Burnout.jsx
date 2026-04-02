@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Mail, Bell, Search, User, ChevronLeft, Play, Clock, Trash2, Check } from "lucide-react";
 import { questions } from "../data/burnoutQuestions";
 
-// --- KOMPONEN GAUGE (SKOR) ---
 const Gauge = ({ score }) => {
   const max = 32;
   const percentage = Math.min(score / max, 1);
@@ -95,7 +94,6 @@ function Burnout() {
     </div>
   );
 
-  // --- 1. HOME ---
   if (viewMode === "home") {
     return (
       <Layout>
@@ -140,7 +138,6 @@ function Burnout() {
     );
   }
 
-  // --- 2. QUIZ ---
   if (viewMode === "quiz") {
     return (
       <Layout>
@@ -185,7 +182,6 @@ function Burnout() {
     );
   }
 
-  // --- 3. RESULT ---
   if (viewMode === "result") {
     const result = getResult();
     return (
