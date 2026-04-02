@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom"
 import { Home, Smile, Flame, BookOpen, User } from "lucide-react"
-import bg from "../assets/BackgroundMood.png"
+import bg from "../assets/BackgroundBottom.png"
 
 function BottomNav() {
   const location = useLocation(); 
