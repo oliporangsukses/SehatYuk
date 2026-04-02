@@ -54,8 +54,11 @@ function Login() {
     }
   }
 
-  // --- ALUR LUPA KATA SANDI (FULL FLOW) ---
+// Alur lupa sandi
   const handleForgotPassword = async () => {
+    // 1. Ambil nama user dari localStorage (Jika tidak ada, pakai "Kak")
+    const storedName = localStorage.getItem("userName") || "Kak";
+
     // Langkah 1: Minta Email
     const { value: emailInput } = await Swal.fire({
       title: 'Lupa Kata Sandi?',
@@ -70,7 +73,7 @@ function Login() {
     })
 
     if (emailInput) {
-      // Validasi email terdaftar (Simulasi)
+      // Validasi email terdaftar
       if (emailInput !== localStorage.getItem("userEmail")) {
         Swal.fire('Error', 'Email ini tidak terdaftar di sistem kami.', 'error');
         return;
@@ -81,7 +84,8 @@ function Login() {
       
       Swal.fire({
         title: 'Mengirim Kode...',
-        html: 'Mohon tunggu sebentar ya, Lip.',
+        // MENGGUNAKAN NAMA DARI LOCALSTORAGE DI SINI
+        html: `Mohon tunggu sebentar ya, <b>${storedName}</b>.`, 
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading() }
       })
@@ -123,7 +127,6 @@ function Login() {
           });
 
           if (newPass) {
-            // Update simulasi database
             localStorage.setItem("userPassword", newPass);
             
             Swal.fire({
@@ -134,7 +137,6 @@ function Login() {
               borderRadius: '25px'
             });
             
-            // Bersihkan input login
             setPassword("");
             setShowForgot(false);
           }
@@ -182,7 +184,7 @@ function Login() {
                 className="w-full p-4 border border-green-100 rounded-[22px] bg-white/90 outline-none focus:ring-2 focus:ring-green-400 text-sm transition-all shadow-sm"
               />
               
-              {/* TOMBOL LUPA SANDI (Hanya muncul jika salah) */}
+              {/* TOMBOL LUPA SANDI (muncul kalau salah sandi) */}
               {showForgot && (
                 <div className="flex justify-end px-2 animate-in fade-in slide-in-from-right-2 duration-300">
                   <button 
