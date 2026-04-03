@@ -114,21 +114,6 @@ function Burnout() {
     setHistory(history.filter(item => item.id !== id));
   };
 
-<<<<<<< HEAD
-  const Layout = ({ children }) => (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-fixed max-w-md mx-auto flex flex-col font-sans relative"
-      style={{ backgroundImage: "url('/assets/MoodBackground.jpeg')" }}
-    >
-      {/* Overlay agar konten tetap terbaca */}
-      <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px]"></div>
-      <Header />
-      <div className="relative z-10 flex-1">{children}</div>
-    </div>
-  );
-
-=======
->>>>>>> e5b14f6af808de20f470720916d81b0c88fd07ec
   if (viewMode === "home") {
     return (
       <Layout navigate={navigate} handleLogout={handleLogout}>
