@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const db = require('./db');
+const bcrypt = require("bcrypt");
 
 // =======================
 // MIDDLEWARE
@@ -15,7 +16,7 @@ app.use(express.json());
 // =======================
 // REGISTER USER
 // =======================
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const { nama_lengkap, email, password } = req.body;
 
   // Validasi
@@ -27,16 +28,26 @@ app.post('/register', (req, res) => {
     return res.status(400).json({ message: "Password minimal 8 karakter!" });
   }
 
-  const sql = "INSERT INTO users (nama_lengkap, email, password) VALUES (?, ?, ?)";
-  db.query(sql, [nama_lengkap, email, password], (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ message: "Gagal daftar" });
-    }
+  try {
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    res.json({ message: "Registrasi berhasil!" });
-  });
+    const sql = "INSERT INTO users (nama_lengkap, email, password) VALUES (?, ?, ?)";
+
+    db.query(sql, [nama_lengkap, email, hashedPassword], (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Gagal daftar" });
+      }
+
+      res.json({ message: "Registrasi berhasil!" });
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 // =======================
 // LOGIN USER
@@ -44,35 +55,41 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  // Validasi
   if (!email || !password) {
     return res.status(400).json({ message: "Email dan password wajib diisi!" });
   }
 
-  const sql = "SELECT * FROM users WHERE email = ? AND password = ?";
-  db.query(sql, [email, password], (err, result) => {
+  const sql = "SELECT * FROM users WHERE email = ?";
+
+  db.query(sql, [email], async (err, result) => {
     if (err) {
       return res.status(500).json({ message: "Terjadi error" });
     }
 
-    if (result.length > 0) {
-      const user = result[0];
-
-      res.json({
-        message: "Login berhasil!",
-        user_id: user.Id,
-        nama_lengkap: user.Nama_lengkap
-      });
-    } else {
-      res.status(401).json({ message: "Email atau password salah!" });
+    if (result.length === 0) {
+      return res.status(401).json({ message: "Email tidak ditemukan!" });
     }
+
+    const user = result[0];
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Password salah!" });
+    }
+
+    res.json({
+      message: "Login berhasil!",
+      user_id: user.id,
+      nama_lengkap: user.nama_lengkap
+    });
   });
 });
+
 
 // =======================
 // SIMPAN MOOD
 // =======================
-
 app.post('/mood', (req, res) => {
   const { user_id, mood } = req.body;
 
@@ -83,7 +100,7 @@ app.post('/mood', (req, res) => {
   const today = new Date().toLocaleDateString('en-CA');
 
   const sql = "INSERT INTO moods (user_id, mood, tanggal) VALUES (?, ?, ?)";
-  
+
   db.query(sql, [user_id, mood, today], (err, result) => {
     if (err) {
       console.log(err);
@@ -94,29 +111,30 @@ app.post('/mood', (req, res) => {
   });
 });
 
+
 // =======================
-// AMBIL MOOD HARI INI
+// AMBIL MOOD TERBARU
 // =======================
 app.get('/mood/:user_id', (req, res) => {
   const { user_id } = req.params;
 
   const sql = `
-    SELECT u.Nama_lengkap AS nama, m.mood, DATE_FORMAT(m.tanggal, '%Y-%m-%d') AS tanggal
+    SELECT u.nama_lengkap AS nama, m.mood, m.tanggal
     FROM moods m
-    JOIN users u ON m.user_id = u.Id
+    JOIN users u ON m.user_id = u.id
     WHERE m.user_id = ?
     ORDER BY m.tanggal DESC, m.created_at DESC
   `;
 
   db.query(sql, [user_id], (err, result) => {
     if (err) {
-      console.log(err);
       return res.status(500).json({ message: "Error mengambil mood" });
     }
 
     res.json(result);
   });
 });
+
 
 // =======================
 // RIWAYAT MOOD
@@ -125,9 +143,10 @@ app.get('/moods/:user_id', (req, res) => {
   const { user_id } = req.params;
 
   const sql = `
-    SELECT u.Nama_lengkap AS nama, m.mood, m.tanggal
+    SELECT u.nama_lengkap AS nama, m.mood,
+    DATE_FORMAT(m.tanggal, '%Y-%m-%d') AS tanggal
     FROM moods m
-    JOIN users u ON m.user_id = u.Id
+    JOIN users u ON m.user_id = u.id
     WHERE m.user_id = ?
     ORDER BY m.tanggal DESC, m.created_at DESC
   `;
@@ -137,18 +156,16 @@ app.get('/moods/:user_id', (req, res) => {
       return res.status(500).json({ message: "Error mengambil riwayat mood" });
     }
 
-    const formattedResult = result.map(item => ({
-      ...item,
-      tanggal: item.tanggal.toISOString().split('T')[0]
-    }));
-
-    res.json(formattedResult);
+    res.json(result);
   });
 });
+
 
 // =======================
 // SERVER
 // =======================
-app.listen(5000, () => {
-  console.log('Server jalan di http://localhost:5000');
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("Server jalan di port " + PORT);
 });
