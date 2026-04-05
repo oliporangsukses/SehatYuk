@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import bgDaun from "../assets/bgDaun.jpeg"
+import Swal from "sweetalert2"
 
 function Register() {
   const navigate = useNavigate()
@@ -13,88 +14,151 @@ function Register() {
     e.preventDefault()
 
     if (!name || !email || !password) {
-      alert("Mohon isi semua data ya!")
+      Swal.fire({
+        icon: 'error',
+        title: 'Data Belum Lengkap',
+        text: 'Mohon isi semua kolom yang tersedia ya!',
+        confirmButtonColor: '#16a34a'
+      })
       return
     }
 
-    // 1. SIMPAN DATA KE LOCALSTORAGE
-    // Kita simpan agar nanti saat Login, aplikasi bisa mencocokkan datanya
-    localStorage.setItem("userName", name)
-    localStorage.setItem("userEmail", email)
-    localStorage.setItem("userPassword", password) // Simpan password untuk simulasi login
-    
-    // Kita JANGAN set "isLoggedIn" ke true di sini, 
-    // karena user harus login dulu secara manual.
+    // Simulasi Loading
+    Swal.fire({
+      title: "Mendaftarkan Akun...",
+      html: "Sedang menyiapkan ruang untuk Anda. ✨",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      timer: 1500,
+    }).then(() => {
+      // 1. SIMPAN DATA KE LOCALSTORAGE
+      localStorage.setItem("userName", name)
+      localStorage.setItem("userEmail", email)
+      localStorage.setItem("userPassword", password) 
 
-    // 2. Notifikasi Sukses
-    alert(`Akun berhasil dibuat, ${name}! Silakan masuk menggunakan email kamu.`);
-
-    // 3. ARAHKAN KE LOGIN (Bukan ke Dashboard/Home)
-    navigate("/login") 
+      // 2. Notifikasi Sukses
+      Swal.fire({
+        icon: "success",
+        title: "Pendaftaran Berhasil!",
+        text: `Halo ${name}, akun Anda sudah aktif. Silakan masuk!`,
+        confirmButtonColor: '#16a34a'
+      }).then(() => {
+        // 3. ARAHKAN KE LOGIN
+        navigate("/login") 
+      })
+    })
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-green-50 p-4">
-      <div
-        className="rounded-3xl shadow-2xl w-80 bg-cover bg-center overflow-hidden border border-white/20"
-        style={{ backgroundImage: `url(${bgDaun})` }}
-      >
-        <div className="p-8 bg-white/80 backdrop-blur-md">
-          <h1 className="text-2xl font-black text-green-700 text-center mb-2 tracking-tight">
-            🌿 SehatYuk
-          </h1>
+    <div className="flex items-center justify-center min-h-screen bg-green-50 p-4 md:p-10 font-sans w-full overflow-x-hidden">
+      
+      {/* CARD UTAMA */}
+      <div className="flex flex-col md:flex-row w-full max-w-5xl h-auto md:h-[650px] bg-white rounded-[40px] md:rounded-[60px] shadow-2xl overflow-hidden border border-white/50">
+        
+        {/* SISI KIRI: INFORMASI */}
+        <div 
+          className="hidden md:flex md:w-1/2 bg-cover bg-center relative p-12 flex-col justify-between text-white"
+          style={{ backgroundImage: `url(${bgDaun})` }}
+        >
+          <div className="absolute inset-0 bg-green-900/40 backdrop-blur-[2px]"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-3">
+              <span className="text-5xl">🌿</span>
+              <div>
+                <h2 className="text-4xl font-black tracking-tighter">SehatYuk</h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-80">Mental Health Tracker</p>
+              </div>
+            </div>
+          </div>
 
-          <h2 className="text-xl font-bold text-center mb-1 text-green-900">
-            Daftar Akun
-          </h2>
+          <div className="relative z-10 mb-8">
+            <h3 className="text-4xl font-black mb-4 leading-tight">Mulai Hidup <br /> Lebih Positif.</h3>
+            <p className="text-sm leading-relaxed opacity-90 font-medium max-w-xs">
+              Bergabunglah untuk mendapatkan akses penuh ke pelacakan emosi, analisis burnout, dan tips kesehatan harian.
+            </p>
+            
+            <div className="mt-8 flex flex-col gap-3">
+               <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-[10px]">✓</div>
+                  <span className="text-xs font-bold uppercase tracking-widest">Pantau Mood Harian</span>
+               </div>
+               <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-[10px]">✓</div>
+                  <span className="text-xs font-bold uppercase tracking-widest">Analisis Burnout Gratis</span>
+               </div>
+            </div>
+          </div>
+        </div>
 
-          <p className="text-green-800/60 text-center mb-6 text-xs font-medium">
-            Buat akun untuk mulai memantau kesehatanmu.
-          </p>
+        {/* SISI KANAN: FORM REGISTER */}
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-16 bg-white relative">
+          
+          <div className="w-full max-w-sm">
+            {/* Form Header */}
+            <div className="mb-10 text-center md:text-left transition-all">
+              <h2 className="text-3xl font-black text-green-950 tracking-tight">
+                {name ? `Halo, ${name}!` : "Daftar Akun"}
+              </h2>
+              <p className="text-sm font-bold text-green-800/40 uppercase tracking-widest mt-1">Lengkapi data untuk bergabung</p>
+            </div>
 
-          <form onSubmit={handleRegister} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Nama Lengkap"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-4 border border-green-100 rounded-2xl bg-white/90 outline-none focus:ring-2 focus:ring-green-400 text-sm transition-all"
-            />
+            <form onSubmit={handleRegister} className="space-y-4">
+              <input
+                type="text"
+                placeholder="Nama Lengkap"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
+              />
 
-            <input
-              type="email"
-              placeholder="Email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-4 border border-green-100 rounded-2xl bg-white/90 outline-none focus:ring-2 focus:ring-green-400 text-sm transition-all"
-            />
+              <input
+                type="email"
+                placeholder="Email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
+              />
 
-            <input
-              type="password"
-              placeholder="Password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-4 border border-green-100 rounded-2xl bg-white/90 outline-none focus:ring-2 focus:ring-green-400 text-sm transition-all"
-            />
+              <input
+                type="password"
+                placeholder="Password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
+              />
 
-            <button 
-              type="submit"
-              className="w-full bg-green-600 text-white p-4 rounded-full hover:bg-green-700 transition-all font-bold shadow-lg active:scale-95"
-            >
-              DAFTAR SEKARANG
-            </button>
-          </form>
+              <button 
+                type="submit"
+                className="w-full bg-green-600 text-white p-5 rounded-[25px] hover:bg-green-700 transition-all font-black shadow-xl active:scale-95 mt-6 text-xs tracking-[0.2em]"
+              >
+                DAFTAR SEKARANG
+              </button>
+            </form>
 
-          <p className="text-xs text-center mt-6 text-green-900/70 font-medium">
-            Sudah punya akun?{" "}
-            <Link to="/login" className="font-bold text-green-700 hover:underline">
-              Masuk di sini
-            </Link>
+            <div className="mt-10 pt-6 border-t border-green-50 text-center">
+              <p className="text-[11px] text-green-900/60 font-bold mb-2">
+                Sudah punya akun SehatYuk?
+              </p>
+              <Link 
+                to="/login" 
+                className="text-xs font-black text-green-700 hover:tracking-widest transition-all uppercase"
+              >
+                Masuk di sini
+              </Link>
+            </div>
+          </div>
+          
+          <p className="absolute bottom-6 text-[9px] font-bold text-green-900/10 uppercase tracking-[0.5em]">
+            SehatYuk v1.0
           </p>
         </div>
+
       </div>
     </div>
   )

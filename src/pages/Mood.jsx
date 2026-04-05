@@ -1,7 +1,16 @@
-import { useState, useEffect } from "react"
-import BottomNav from "../components/BottomNav"
-// Menggunakan MoodBackground sebagai background utama
-import bgMoodPage from "../assets/MoodBackground.jpeg" 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import BottomNav from "../components/BottomNav";
+import bgMoodPage from "../assets/MoodBackground.jpeg"; 
+import { 
+  Bell, 
+  User, 
+  MessageSquare, 
+  LogOut, 
+  PlusCircle,
+  History,
+  ArrowRight
+} from "lucide-react";
 import {
   Chart as ChartJS,
   LineElement,
@@ -91,28 +100,54 @@ function Mood() {
   const { labels, dataPoints } = getLastSevenDays();
 
   return (
-    // BACKGROUND UTAMA MENGGUNAKAN MoodBackground.png
-    <div className="p-5 min-h-screen pb-28 bg-cover bg-center bg-fixed"
+    <div className="min-h-screen pb-28 bg-cover bg-center bg-fixed relative flex flex-col font-sans transition-colors duration-500"
       style={{ backgroundImage: `url(${bgMoodPage})` }}>
       
-      <div className="flex flex-col items-start mb-6 pt-4">
-        <h1 className="text-2xl font-extrabold text-green-900 font-sans">Mood Tracker</h1>
-        <p className="text-xs text-green-700 font-medium italic">Simpan memorimu hari ini...</p>
-      </div>
-      
-      {/* CARD INPUT: Gradasi Glassmorphism menyesuaikan background */}
-      <div className="p-6 rounded-[35px] shadow-lg border border-white/40 bg-gradient-to-br from-white/70 to-green-50/50 backdrop-blur-md mb-6">
-        <div className="flex justify-between mb-6 px-2">
-          {[5, 4, 3, 2, 1].map((s) => (
-            <button 
-              key={s}
-              onClick={() => setSelectedScore(s)} 
-              className={`text-4xl transition-all duration-300 transform ${selectedScore === s ? "scale-125 drop-shadow-md" : "grayscale opacity-40 hover:opacity-100 hover:scale-110"}`}
+      <div className="min-h-screen bg-white/10 dark:bg-black/60 transition-colors duration-500">
+
+        {/* HEADER */}
+        <header className="flex justify-between items-center p-4 pt-6 z-20 sticky top-0 bg-white/10 dark:bg-black/20 backdrop-blur-sm border-b border-white/10">
+          <div className="flex items-center gap-1 cursor-pointer group" onClick={() => navigate("/")}>
+            <span className="text-2xl group-hover:rotate-12 transition-transform">🌿</span>
+            <h1 className="text-xl font-black text-green-700 dark:text-green-400 tracking-tight">SehatYuk</h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <MessageSquare className="text-green-800/60 dark:text-green-300/60 cursor-pointer hover:text-green-600" size={20} />
+            <Bell className="text-green-800/60 dark:text-green-300/60 cursor-pointer hover:text-green-600" size={20} />
+            <div 
+              onClick={() => navigate("/profile")}
+              className="w-8 h-8 rounded-full bg-green-100 dark:bg-slate-800 flex items-center justify-center border border-white/50 dark:border-slate-700 shadow-sm cursor-pointer hover:bg-green-200 transition-all"
             >
-              {["", "😢", "😔", "😐", "😊", "😁"][s]}
-            </button>
-          ))}
-        </div>
+                <User size={16} className="text-green-700 dark:text-green-400" />
+            </div>
+            <LogOut className="text-red-500/60 cursor-pointer hover:text-red-600 ml-1" size={20} onClick={handleLogout} />
+          </div>
+        </header>
+
+        <div className="p-5 flex-1">
+          {/* JUDUL */}
+          <div className="flex flex-col items-start mb-6">
+            <h1 className="text-2xl font-extrabold text-green-900 dark:text-white leading-tight">Mood Tracker</h1>
+            <p className="text-xs text-green-700 dark:text-green-400 font-bold italic">Simpan memorimu hari ini...</p>
+          </div>
+          
+          {/* INPUT CARD (SINKRON UKURAN) */}
+          <div className="p-6 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-900/90 backdrop-blur-md mb-6">
+            <h3 className="font-black text-[10px] text-green-800/50 dark:text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <PlusCircle size={12} /> Bagaimana Perasaanmu?
+            </h3>
+            <div className="flex justify-between mb-6 px-2">
+              {[5, 4, 3, 2, 1].map((s) => (
+                <button 
+                  key={s}
+                  onClick={() => setSelectedScore(s)} 
+                  className={`text-4xl transition-all duration-300 transform ${selectedScore === s ? "scale-125 drop-shadow-md grayscale-0" : "grayscale opacity-40 hover:opacity-100 hover:scale-110"}`}
+                >
+                  {["", "😡", "😢", "😐", "🙂", "😊"][s]}
+                </button>
+              ))}
+            </div>
 
             <textarea 
               className="w-full p-4 rounded-2xl bg-white/60 dark:bg-slate-800/60 border border-green-100 dark:border-slate-700 text-sm focus:outline-none text-green-900 dark:text-white placeholder:text-green-700/50 resize-none transition-colors"
@@ -160,15 +195,32 @@ function Mood() {
                 }} 
               />
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* CARD STATISTIK */}
-      <div className="p-6 rounded-[35px] shadow-lg border border-white/40 bg-gradient-to-br from-white/70 to-green-50/50 backdrop-blur-md mb-4">
-        <h3 className="font-bold text-green-900 mb-4 text-sm text-left px-1">Statistik Mingguan</h3>
-        <div className="h-44">
-          <Line data={data} options={options} />
+          {/* RIWAYAT CATATAN */}
+          <div className="p-6 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-900/90 backdrop-blur-md">
+            <h3 className="font-black text-[10px] text-green-800/50 dark:text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <History size={12} /> Catatan Terakhir
+            </h3>
+            <div className="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+              {moodNotes.length > 0 ? moodNotes.map((m, i) => (
+                <div key={i} className="flex gap-4 items-center bg-white/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-white/50 dark:border-slate-700 shadow-sm animate-in fade-in slide-in-from-left-2 transition-all">
+                  <span className="text-3xl">{["", "😡", "😢", "😐", "🙂", "😊"][m.score]}</span>
+                  <div className="text-left flex-1">
+                    <div className="flex justify-between items-center">
+                      <p className="text-[10px] font-black text-green-600 dark:text-green-400 uppercase tracking-widest mb-1">{m.date}, {m.fullDate}</p>
+                      <ArrowRight size={10} className="text-green-400" />
+                    </div>
+                    <p className="text-xs text-green-950 dark:text-slate-200 font-bold leading-relaxed">"{m.note}"</p>
+                  </div>
+                </div>
+              )) : (
+                <div className="py-10 text-center">
+                  <p className="text-[10px] text-green-800/30 dark:text-slate-500 font-black uppercase tracking-widest italic">Belum ada cerita hari ini...</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       <BottomNav />

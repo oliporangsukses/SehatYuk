@@ -1,104 +1,178 @@
-import { Link, useNavigate } from "react-router-dom"
-import { useState } from "react"
-import bgDaun from "../assets/bgDaun.jpeg"
-import Swal from "sweetalert2"
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import bgDaun from "../assets/bgDaun.jpeg";
+import Swal from "sweetalert2";
 
 function Login() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showForgot, setShowForgot] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleForgotPassword = () => {
+    Swal.fire({
+      title: "Mengirim Kode...",
+      html: "Mohon tunggu sebentar, sedang memproses permintaan Anda.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      timer: 2000,
+    }).then(() => {
+      Swal.fire({
+        icon: "success",
+        title: "Kode Terkirim!",
+        text: "Silakan cek email Anda untuk instruksi reset password.",
+        confirmButtonColor: "#16a34a",
+      });
+    });
+  };
 
   const handleLogin = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // LOGIKA PENYIMPANAN DATA USER
-    // Nanti jika sudah pakai API, ambil 'name' dari response backend
-    // Untuk sekarang, kita ambil bagian depan email sebagai nama
-    const detectedName = email.split('@')[0] || "User"
-    
-    // Simpan ke localStorage agar bisa dibaca oleh komponen Home
-    localStorage.setItem("userName", detectedName)
-    localStorage.setItem("isLoggedIn", "true")
+    Swal.fire({
+      title: "Memproses Masuk...",
+      html: "Sedang memverifikasi data login Anda.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      timer: 1500,
+    }).then(() => {
 
-    alert(`Login berhasil! Selamat datang, ${detectedName}`)
-    navigate("/")
-  }
+      const registeredName = localStorage.getItem("userName");
+      const detectedName = registeredName || email.split("@")[0] || "User";
+      
+      localStorage.setItem("userName", detectedName);
+      localStorage.setItem("isLoggedIn", "true");
+
+      Swal.fire({
+        icon: "success",
+        title: "Login Berhasil!",
+        text: `Selamat datang kembali, ${detectedName}!`,
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
+        navigate("/");
+      });
+    });
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-green-50 p-4 font-sans">
-      <div
-        className="rounded-[40px] shadow-2xl w-80 bg-cover bg-center overflow-hidden border border-white/20 transition-all duration-500"
-        style={{ backgroundImage: `url(${bgDaun})` }}
-      >
-        <div className="p-9 bg-white/85 backdrop-blur-lg">
-          <div className="flex flex-col items-center mb-6">
-            <span className="text-4xl mb-2">🌿</span>
-            <h1 className="text-3xl font-black text-green-700 tracking-tighter">
-              SehatYuk
-            </h1>
-            <p className="text-[10px] font-bold text-green-800/50 uppercase tracking-[0.2em] mt-1">
-              Mental Health Tracker
-            </p>
+    <div className="flex items-center justify-center min-h-screen bg-green-50 p-4 md:p-10 font-sans w-full overflow-x-hidden">
+      
+      {/* CARD UTAMA */}
+      <div className="flex flex-col md:flex-row w-full max-w-5xl h-auto md:h-[600px] bg-white rounded-[40px] md:rounded-[60px] shadow-2xl overflow-hidden border border-white/50">
+        
+        {/* INFORMASI WEB */}
+        <div 
+          className="hidden md:flex md:w-1/2 bg-cover bg-center relative p-12 flex-col justify-between text-white"
+          style={{ backgroundImage: `url(${bgDaun})` }}
+        >
+          <div className="absolute inset-0 bg-green-900/40 backdrop-blur-[2px]"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-2">
+              <span className="text-5xl">🌿</span>
+              <div>
+                <h2 className="text-4xl font-black tracking-tighter">SehatYuk</h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-80">Mental Health Tracker</p>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1">
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-4 border border-green-100 rounded-[22px] bg-white/90 outline-none focus:ring-2 focus:ring-green-400 text-sm transition-all shadow-sm"
-              />
+          <div className="relative z-10 mb-8">
+            <h3 className="text-3xl font-black mb-4 leading-tight">Mulai Perjalanan <br /> Sehatmu Bersama Kami.</h3>
+            <p className="text-sm leading-relaxed opacity-90 font-medium max-w-xs">
+              Kelola kesehatan mentalmu dengan fitur Mood Tracker dan Burnout Test yang didesain khusus untuk membantumu tetap stabil setiap hari.
+            </p>
+            
+            <div className="mt-8 flex gap-3">
+               <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-[10px] font-black uppercase tracking-widest">
+                 Safe & Private
+               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FORM LOGIN */}
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-16 bg-white relative">
+          
+          <div className="w-full max-w-sm">
+            {/* Mobile Header */}
+            <div className="md:hidden flex flex-col items-center mb-10">
+              <span className="text-5xl mb-2">🌿</span>
+              <h1 className="text-3xl font-black text-green-700 tracking-tighter">SehatYuk</h1>
             </div>
 
-            <div className="space-y-1">
-              <input
-                type="password"
-                placeholder="Password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-4 border border-green-100 rounded-[22px] bg-white/90 outline-none focus:ring-2 focus:ring-green-400 text-sm transition-all shadow-sm"
-              />
-              
-              {/* TOMBOL LUPA SANDI (muncul kalau salah sandi) */}
-              {showForgot && (
-                <div className="flex justify-end px-2 animate-in fade-in slide-in-from-right-2 duration-300">
+            {/* Form Header */}
+            <div className="mb-10 text-center md:text-left">
+              <h2 className="text-3xl font-black text-green-950 tracking-tight">Selamat Datang!</h2>
+              <p className="text-sm font-bold text-green-800/40 uppercase tracking-widest mt-1">Silakan masuk ke akun Anda</p>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="group">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
+                />
+              </div>
+
+              <div className="group relative">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
+                />
+                <div className="flex justify-end mt-3 px-2">
                   <button 
                     type="button" 
-                    onClick={handleForgotPassword}
-                    className="text-[10px] font-black text-green-600 hover:text-green-800 underline uppercase tracking-tighter"
+                    onClick={handleForgotPassword} 
+                    className="text-[10px] font-black text-green-600 hover:text-green-800 underline uppercase tracking-tighter transition-colors"
                   >
                     Lupa kata sandi?
                   </button>
                 </div>
-              )}
+              </div>
+
+              <button 
+                type="submit"
+                className="w-full bg-green-600 text-white p-5 rounded-[25px] hover:bg-green-700 hover:shadow-green-200 transition-all font-black shadow-xl active:scale-95 mt-6 text-xs tracking-[0.2em]"
+              >
+                MASUK SEKARANG
+              </button>
+            </form>
+
+            <div className="mt-12 pt-8 border-t border-green-50 text-center">
+              <p className="text-[11px] text-green-900/60 font-bold mb-2">
+                Belum punya akun SehatYuk?
+              </p>
+              <Link 
+                to="/register" 
+                className="text-xs font-black text-green-700 hover:text-green-900 hover:tracking-widest transition-all uppercase"
+              >
+                Daftar Akun Baru
+              </Link>
             </div>
-
-            <button 
-              type="submit"
-              className="w-full bg-green-600 text-white p-4 rounded-full hover:bg-green-700 transition-all font-black shadow-lg active:scale-95 mt-4 tracking-widest text-xs"
-            >
-              MASUK SEKARANG
-            </button>
-          </form>
-
-          <div className="mt-8 pt-6 border-t border-green-100 flex flex-col items-center">
-            <p className="text-[11px] text-green-900/60 font-bold mb-1">
-              Belum punya akun SehatYuk?
-            </p>
-            <Link to="/register" className="text-xs font-black text-green-700 hover:underline tracking-tight">
-              DAFTAR AKUN BARU
-            </Link>
           </div>
+          
+          <p className="absolute bottom-6 text-[9px] font-bold text-green-900/10 uppercase tracking-[0.5em]">
+            SehatYuk v1.0
+          </p>
         </div>
+
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;
