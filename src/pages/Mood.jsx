@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
@@ -11,6 +12,13 @@ import {
   History,
   ArrowRight
 } from "lucide-react";
+=======
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ FIX
+import BottomNav from "../components/BottomNav";
+import bgMoodPage from "../assets/MoodBackground.jpeg";
+
+>>>>>>> f70a892db11f32ddb6a675df9cb54fe65c46ae74
 import {
   Chart as ChartJS,
   LineElement,
@@ -26,17 +34,15 @@ ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Filler, 
 
 function Mood() {
   const navigate = useNavigate();
-  const isDark = document.documentElement.classList.contains('dark');
+  const isDark = document.documentElement.classList.contains("dark");
 
-  // --- HELPER TANGGAL ---
-  const getTodayStr = () => new Date().toISOString().split('T')[0];
+  const getTodayStr = () => new Date().toISOString().split("T")[0];
 
-  // --- STATE (SINKRON DENGAN HOME) ---
   const [moodScores, setMoodScores] = useState(() => {
     const saved = localStorage.getItem("user_moods_v3");
     return saved ? JSON.parse(saved) : {};
   });
-  
+
   const [moodNotes, setMoodNotes] = useState(() => {
     const saved = localStorage.getItem("user_mood_notes_v3");
     return saved ? JSON.parse(saved) : [];
@@ -45,7 +51,6 @@ function Mood() {
   const [note, setNote] = useState("");
   const [selectedScore, setSelectedScore] = useState(null);
 
-  // --- FUNGSI SIMPAN ---
   const addMood = () => {
     if (selectedScore === null) {
       alert("Pilih emoji mood dulu ya!");
@@ -53,20 +58,18 @@ function Mood() {
     }
 
     const today = getTodayStr();
-    
-    // 1. Simpan Score untuk Grafik
+
     const updatedScores = { ...moodScores, [today]: selectedScore };
     setMoodScores(updatedScores);
     localStorage.setItem("user_moods_v3", JSON.stringify(updatedScores));
 
-    // 2. Simpan Catatan untuk Riwayat
     const newNoteEntry = {
       score: selectedScore,
       note: note || "Tidak ada catatan",
-      date: new Date().toLocaleDateString('id-ID', { weekday: 'short' }),
-      fullDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
+      date: new Date().toLocaleDateString("id-ID", { weekday: "short" }),
+      fullDate: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
     };
-    
+
     const updatedNotes = [newNoteEntry, ...moodNotes].slice(0, 20);
     setMoodNotes(updatedNotes);
     localStorage.setItem("user_mood_notes_v3", JSON.stringify(updatedNotes));
@@ -81,18 +84,17 @@ function Mood() {
     navigate("/login");
   };
 
-  // --- DATA GRAFIK 7 HARI ---
   const getLastSevenDays = () => {
     const labels = [];
     const dataPoints = [];
     const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
-    
+
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const ds = d.toISOString().split('T')[0];
+      const ds = d.toISOString().split("T")[0];
       labels.push(days[d.getDay()]);
-      dataPoints.push(moodScores[ds] || 3); 
+      dataPoints.push(moodScores[ds] || 3);
     }
     return { labels, dataPoints };
   };
@@ -100,6 +102,7 @@ function Mood() {
   const { labels, dataPoints } = getLastSevenDays();
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen pb-28 bg-cover bg-center bg-fixed relative flex flex-col font-sans transition-colors duration-500"
       style={{ backgroundImage: `url(${bgMoodPage})` }}>
       
@@ -118,6 +121,29 @@ function Mood() {
             <div 
               onClick={() => navigate("/profile")}
               className="w-8 h-8 rounded-full bg-green-100 dark:bg-slate-800 flex items-center justify-center border border-white/50 dark:border-slate-700 shadow-sm cursor-pointer hover:bg-green-200 transition-all"
+=======
+    <div
+      className="p-5 min-h-screen pb-28 bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: `url(${bgMoodPage})` }}
+    >
+      <div className="flex flex-col items-start mb-6 pt-4">
+        <h1 className="text-2xl font-extrabold text-green-900">Mood Tracker</h1>
+        <p className="text-xs text-green-700 italic">Simpan memorimu hari ini...</p>
+      </div>
+
+      {/* INPUT */}
+      <div className="p-6 rounded-[35px] shadow-lg border border-white/40 bg-gradient-to-br from-white/70 to-green-50/50 backdrop-blur-md mb-6">
+        <div className="flex justify-between mb-6 px-2">
+          {[5, 4, 3, 2, 1].map((s) => (
+            <button
+              key={s}
+              onClick={() => setSelectedScore(s)}
+              className={`text-4xl transition-all ${
+                selectedScore === s
+                  ? "scale-125"
+                  : "grayscale opacity-40 hover:opacity-100"
+              }`}
+>>>>>>> f70a892db11f32ddb6a675df9cb54fe65c46ae74
             >
                 <User size={16} className="text-green-700 dark:text-green-400" />
             </div>
@@ -149,21 +175,13 @@ function Mood() {
               ))}
             </div>
 
-            <textarea 
-              className="w-full p-4 rounded-2xl bg-white/60 dark:bg-slate-800/60 border border-green-100 dark:border-slate-700 text-sm focus:outline-none text-green-900 dark:text-white placeholder:text-green-700/50 resize-none transition-colors"
-              placeholder="Apa yang membuatmu merasa begini?"
-              rows="3"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-            
-            <button 
-              onClick={addMood}
-              className="w-full mt-4 bg-green-600 dark:bg-green-700 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-green-700 active:scale-95 transition-all"
-            >
-              Simpan Cerita Hari Ini
-            </button>
-          </div>
+        <textarea
+          className="w-full p-4 rounded-2xl bg-white/60 border text-sm"
+          placeholder="Apa yang membuatmu merasa begini?"
+          rows="3"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
 
           {/* TREN MINGGUAN */}
           <div className="p-6 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-900/90 backdrop-blur-md mb-6">
@@ -223,6 +241,7 @@ function Mood() {
           </div>
         </div>
       </div>
+
       <BottomNav />
     </div>
   );
