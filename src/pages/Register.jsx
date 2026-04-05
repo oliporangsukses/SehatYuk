@@ -10,7 +10,7 @@ function Register() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
 
     if (!name || !email || !password) {
@@ -23,41 +23,68 @@ function Register() {
       return
     }
 
-    // Simulasi Loading
+    // LOADING
     Swal.fire({
       title: "Mendaftarkan Akun...",
       html: "Sedang menyiapkan ruang untuk Anda. ✨",
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      },
-      timer: 1500,
-    }).then(() => {
-      // 1. SIMPAN DATA KE LOCALSTORAGE
-      localStorage.setItem("userName", name)
-      localStorage.setItem("userEmail", email)
-      localStorage.setItem("userPassword", password) 
-
-      // 2. Notifikasi Sukses
-      Swal.fire({
-        icon: "success",
-        title: "Pendaftaran Berhasil!",
-        text: `Halo ${name}, akun Anda sudah aktif. Silakan masuk!`,
-        confirmButtonColor: '#16a34a'
-      }).then(() => {
-        // 3. ARAHKAN KE LOGIN
-        navigate("/login") 
-      })
+      }
     })
+
+    try {
+      const response = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          nama_lengkap: name,
+          email: email,
+          password: password
+        })
+      })
+
+      const data = await response.json()
+
+      Swal.close()
+
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Pendaftaran Berhasil!",
+          text: `Halo ${name}, akun Anda sudah aktif. Silakan masuk!`,
+          confirmButtonColor: '#16a34a'
+        }).then(() => {
+          navigate("/login")
+        })
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.message || "Terjadi kesalahan",
+          confirmButtonColor: '#16a34a'
+        })
+      }
+
+    } catch (error) {
+      Swal.close()
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: "Pastikan backend berjalan di port 5000!",
+        confirmButtonColor: '#16a34a'
+      })
+    }
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-green-50 p-4 md:p-10 font-sans w-full overflow-x-hidden">
       
-      {/* CARD UTAMA */}
       <div className="flex flex-col md:flex-row w-full max-w-5xl h-auto md:h-[650px] bg-white rounded-[40px] md:rounded-[60px] shadow-2xl overflow-hidden border border-white/50">
         
-        {/* SISI KIRI: INFORMASI */}
+        {/* KIRI */}
         <div 
           className="hidden md:flex md:w-1/2 bg-cover bg-center relative p-12 flex-col justify-between text-white"
           style={{ backgroundImage: `url(${bgDaun})` }}
@@ -75,34 +102,26 @@ function Register() {
           </div>
 
           <div className="relative z-10 mb-8">
-            <h3 className="text-4xl font-black mb-4 leading-tight">Mulai Hidup <br /> Lebih Positif.</h3>
+            <h3 className="text-4xl font-black mb-4 leading-tight">
+              Mulai Hidup <br /> Lebih Positif.
+            </h3>
             <p className="text-sm leading-relaxed opacity-90 font-medium max-w-xs">
               Bergabunglah untuk mendapatkan akses penuh ke pelacakan emosi, analisis burnout, dan tips kesehatan harian.
             </p>
-            
-            <div className="mt-8 flex flex-col gap-3">
-               <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-[10px]">✓</div>
-                  <span className="text-xs font-bold uppercase tracking-widest">Pantau Mood Harian</span>
-               </div>
-               <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-[10px]">✓</div>
-                  <span className="text-xs font-bold uppercase tracking-widest">Analisis Burnout Gratis</span>
-               </div>
-            </div>
           </div>
         </div>
 
-        {/* SISI KANAN: FORM REGISTER */}
+        {/* KANAN */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-16 bg-white relative">
           
           <div className="w-full max-w-sm">
-            {/* Form Header */}
-            <div className="mb-10 text-center md:text-left transition-all">
+            <div className="mb-10 text-center md:text-left">
               <h2 className="text-3xl font-black text-green-950 tracking-tight">
                 {name ? `Halo, ${name}!` : "Daftar Akun"}
               </h2>
-              <p className="text-sm font-bold text-green-800/40 uppercase tracking-widest mt-1">Lengkapi data untuk bergabung</p>
+              <p className="text-sm font-bold text-green-800/40 uppercase tracking-widest mt-1">
+                Lengkapi data untuk bergabung
+              </p>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">
