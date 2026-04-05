@@ -2,12 +2,14 @@
 // IMPORT
 // =======================
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const db = require('./db');
 
 // =======================
 // MIDDLEWARE
 // =======================
+app.use(cors());
 app.use(express.json());
 
 // =======================
@@ -147,6 +149,6 @@ app.get('/moods/:user_id', (req, res) => {
 // =======================
 // SERVER
 // =======================
-app.listen(3000, () => {
-  console.log('Server jalan di http://localhost:3000');
+app.listen(5000, () => {
+  console.log('Server jalan di http://localhost:5000');
 });
