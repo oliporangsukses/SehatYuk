@@ -4,8 +4,6 @@ import ArticleCard from "../components/ArticleCard"
 import BottomNav from "../components/BottomNav"
 import { MessageSquare, Bell, Search, LogOut, User, X } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-
-// Gunakan background yang sama dengan Mood.jsx
 import bgMoodPage from "../assets/MoodBackground.jpeg" 
 
 function Artikel() {
@@ -13,7 +11,6 @@ function Artikel() {
   const [search, setSearch] = useState("")
   const inputRef = useRef(null)
 
-  // Pastikan user sudah login
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn")
     if (!isLoggedIn) {
@@ -35,10 +32,9 @@ function Artikel() {
       className="min-h-screen bg-cover bg-center bg-fixed relative flex flex-col font-sans transition-colors duration-500"
       style={{ backgroundImage: `url(${bgMoodPage})` }}
     >
-      {/* Overlay Gelap untuk Dark Mode */}
+
       <div className="min-h-screen bg-white/10 dark:bg-black/60 transition-colors duration-500">
         
-        {/* HEADER SECTION */}
         <header className="flex justify-between items-center p-4 pt-6 z-20 sticky top-0 bg-white/10 dark:bg-black/20 backdrop-blur-sm border-b border-white/10">
           <div className="flex items-center gap-1 cursor-pointer group" onClick={() => navigate("/")}>
             <span className="text-2xl group-hover:rotate-12 transition-transform">🌿</span>
@@ -60,10 +56,7 @@ function Artikel() {
           </div>
         </header>
 
-        {/* Konten Utama */}
         <div className="p-5 pb-28">
-          
-          {/* Judul Halaman */}
           <div className="mt-4 mb-6 px-2">
              <h3 className="font-black text-[10px] text-green-900/50 dark:text-slate-400 uppercase tracking-widest mb-1">
                Edukasi Kesehatan
@@ -73,7 +66,6 @@ function Artikel() {
              </h1>
           </div>
 
-          {/* Search Bar */}
           <div className="mb-8 px-1">
             <div className="relative flex items-center">
               <input
@@ -97,19 +89,21 @@ function Artikel() {
             </div>
           </div>
 
-          {/* List Artikel */}
-          <div className="space-y-6">
-            {filteredArticles.length > 0 ? (
-              filteredArticles.map((item) => (
-                <div key={item.id} className="transition-all hover:scale-[1.01] active:scale-[0.98]">
-                  <ArticleCard {...item} />
-                </div>
-              ))
-            ) : (
-              <div className="p-10 text-center bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-[35px] border border-white/50 dark:border-slate-700 transition-colors">
-                <span className="text-4xl mb-3 block">😢</span>
-                <p className="text-green-800 dark:text-slate-300 font-bold text-sm">Artikel tidak ditemukan</p>
-              </div>
+         <div className="w-full grid grid-cols-2 gap-4 px-2"> 
+  {filteredArticles.length > 0 ? (
+    filteredArticles.map((item) => (
+      <div 
+        key={item.id} 
+        className="transition-all duration-300 hover:brightness-95 active:scale-[0.98]"
+      >
+        <ArticleCard {...item} />
+      </div>
+    ))
+  ) : (
+    <div className="col-span-2 p-10 text-center bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-[35px]">
+      <span className="text-4xl mb-3 block">😢</span>
+      <p className="text-green-800 dark:text-slate-300 font-bold text-sm">Artikel tidak ditemukan</p>
+    </div>
             )}
           </div>
         </div>
