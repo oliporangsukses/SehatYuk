@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 import bgMoodPage from "../assets/MoodBackground.jpeg"; 
 
-// Data burnoutQuestions.js
+// --- 1. DATA PERTANYAAN ---
 const questions = [
   { id: 1, question: "Saya merasa lelah secara emosional karena pekerjaan atau aktivitas sehari-hari." },
   { id: 2, question: "Saya merasa kehilangan motivasi untuk melakukan aktivitas yang biasanya saya sukai." },
@@ -16,13 +16,12 @@ const questions = [
   { id: 8, question: "Saya merasa tertekan dengan tanggung jawab yang ada." }
 ];
 
+// --- 2. KOMPONEN LAYOUT ---
 const Layout = ({ children, navigate, handleLogout }) => (
   <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex justify-center items-start overflow-x-hidden transition-colors duration-500">
-    <div 
-      className="w-full min-h-screen bg-cover bg-center bg-fixed flex flex-col font-sans relative shadow-2xl"
-      style={{ backgroundImage: `url(${bgMoodPage})` }}
-    >
-      <div className="flex-1 bg-white/20 dark:bg-black/60 backdrop-blur-[2px] flex flex-col pb-28 text-slate-900 dark:text-white">
+    <div className="w-full min-h-screen bg-cover bg-center bg-fixed flex flex-col font-sans relative shadow-2xl"
+      style={{ backgroundImage: `url(${bgMoodPage})` }}>
+      <div className="flex-1 bg-white/20 dark:bg-black/60 backdrop-blur-[2px] flex flex-col pb-28 text-slate-900 dark:text-white transition-colors duration-500">
         <header className="w-full flex justify-between items-center p-5 pt-7 z-20 sticky top-0 bg-white/10 backdrop-blur-md border-b border-white/10">
           <div className="flex items-center gap-1 cursor-pointer group" onClick={() => navigate("/")}>
             <span className="text-2xl group-hover:rotate-12 transition-transform">🌿</span>
@@ -30,26 +29,20 @@ const Layout = ({ children, navigate, handleLogout }) => (
           </div>
           <div className="flex items-center gap-3">
             <MessageSquare className="text-green-800/60 dark:text-green-300/60 cursor-pointer hover:text-green-600" size={20} onClick={() => navigate("/mood")} />
-            <div onClick={() => navigate("/profile")} className="w-8 h-8 rounded-full bg-green-100 dark:bg-slate-800 flex items-center justify-center border border-white/50 cursor-pointer shadow-sm">
+            <div onClick={() => navigate("/profile")} className="w-8 h-8 rounded-full bg-green-100 dark:bg-slate-800 flex items-center justify-center border border-white/50 cursor-pointer shadow-sm transition-colors">
                 <User size={16} className="text-green-700 dark:text-green-400" />
             </div>
             <LogOut className="text-red-500/60 cursor-pointer hover:text-red-600 ml-1" size={20} onClick={handleLogout} />
           </div>
         </header>
-
-        {/* Konten Utama */}
-        <div className="relative z-10 flex-1 px-5 md:px-12 lg:px-24 max-w-7xl mx-auto w-full">
-            {children}
-        </div>
-        
-        <div className="fixed bottom-0 left-0 w-full z-30">
-            <BottomNav />
-        </div>
+        <div className="relative z-10 flex-1 px-5 md:px-12 lg:px-24 max-w-7xl mx-auto w-full">{children}</div>
+        <div className="fixed bottom-0 left-0 w-full z-30"><BottomNav /></div>
       </div>
     </div>
   </div>
 );
 
+// --- 3. KOMPONEN GAUGE SKOR ---
 const Gauge = ({ score }) => {
   const max = 32;
   const percentage = Math.min(score / max, 1);
@@ -80,11 +73,12 @@ const Gauge = ({ score }) => {
   );
 };
 
+// --- 4. KOMPONEN UTAMA (BURNOUT) ---
 function Burnout() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("home");
   const [answers, setAnswers] = useState({});
-  const [userName] = useState(() => localStorage.getItem("userName") || "Olipia"); // Default ke namamu jika kosong
+  const [userName] = useState(() => localStorage.getItem("userName") || "Olipia");
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem("burnout_history");
     return saved ? JSON.parse(saved) : [];
@@ -96,97 +90,139 @@ function Burnout() {
   const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
 
   const getResult = (score = totalScore) => {
-    if (score <= 12) return { level: "Rendah", desc: "Kondisi Anda stabil. Tetap jaga keseimbangan ya!" };
-    if (score <= 20) return { level: "Sedang", desc: "Anda mulai merasa lelah. Luangkan waktu sejenak untuk istirahat." };
-    return { level: "Tinggi", desc: "Tingkat burnout tinggi. Disarankan untuk mengambil jeda sejenak." };
+    if (score <= 12) return { 
+      level: "Rendah", desc: "Kondisi Anda stabil. Tetap jaga keseimbangan ya!",
+      tips: ["Pertahankan rutinitas tidur", "Tetap aktif berolahraga", "Jaga pola makan sehat"]
+    };
+    if (score <= 20) return { 
+      level: "Sedang", desc: "Anda mulai merasa lelah. Luangkan waktu sejenak untuk istirahat.",
+      tips: ["Kurangi penggunaan gadget sebelum tidur", "Coba teknik pernapasan dalam", "Lakukan hobi di akhir pekan"]
+    };
+    return { 
+      level: "Tinggi", desc: "Tingkat burnout tinggi. Disarankan untuk mengambil jeda sejenak.",
+      tips: ["Prioritaskan istirahat total", "Bicarakan bebanmu dengan teman dekat", "Konsultasi jika perlu jeda lebih lama"]
+    };
   };
 
   const saveToHistory = () => {
     const result = getResult();
     const newEntry = { id: Date.now(), date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), score: totalScore, level: result.level };
-    setHistory([newEntry, ...history]); setAnswers({}); setViewMode("home");
+    setHistory([newEntry, ...history]); 
+    setAnswers({}); 
+    setViewMode("home");
   };
 
-  if (viewMode === "home") {
-    return (
-      <Layout navigate={navigate} handleLogout={handleLogout}>
-        <div className="mt-8 md:mt-12 max-w-5xl mx-auto">
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[40px] p-8 md:p-12 mb-8 border border-white/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
+  // --- RENDERING TAMPILAN ---
+  return (
+    <Layout navigate={navigate} handleLogout={handleLogout}>
+      
+      {/* 1. TAMPILAN AWAL (DASHBOARD) */}
+      {viewMode === "home" && (
+        <div className="mt-8 md:mt-12 max-w-5xl mx-auto animate-in fade-in duration-700">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[40px] p-8 md:p-12 mb-8 border border-white/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 transition-colors">
             <div className="text-center md:text-left">
                 <h2 className="text-3xl font-black text-green-950 dark:text-white mb-2">Halo, {userName}! 👋</h2>
                 <p className="text-xs font-bold text-green-700 dark:text-green-400 uppercase tracking-[0.2em] mb-6">Cek tingkat burnout Anda hari ini</p>
-                <button onClick={() => setViewMode("quiz")} className="w-full md:w-max px-10 bg-green-600 text-white py-4 rounded-2xl font-black text-xs shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-3"><Play size={18} fill="currentColor" /> MULAI TES SEKARANG</button>
+                <button onClick={() => setViewMode("quiz")} className="w-full md:w-max px-10 bg-green-600 text-white py-4 rounded-2xl font-black text-xs shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-3 active:scale-95"><Play size={18} fill="currentColor" /> MULAI TES SEKARANG</button>
             </div>
-            <div className="hidden md:block w-48 h-48 bg-green-100/50 rounded-full flex items-center justify-center border border-white shadow-inner"><span className="text-6xl">📊</span></div>
+            <div className="hidden md:block w-48 h-48 bg-green-100/50 dark:bg-green-900/20 rounded-full flex items-center justify-center border border-white dark:border-slate-700 shadow-inner"><span className="text-6xl">📊</span></div>
           </div>
-          <h3 className="font-black text-[10px] text-green-900/50 uppercase tracking-widest mb-6 flex items-center gap-2 px-2"><Clock size={14} /> RIWAYAT AKTIVITAS</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {history.length === 0 ? (<div className="col-span-full text-center py-16 bg-white/40 rounded-[40px] border border-white/40 shadow-sm"><p className="text-[10px] font-black uppercase tracking-widest text-green-900/30">Belum ada data tes.</p></div>) : 
-            (history.map((item) => (
-                <div key={item.id} className="flex flex-col p-6 rounded-[35px] border border-white/50 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md shadow-sm">
+
+          <h3 className="font-black text-[10px] text-green-900/50 dark:text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 px-2 transition-colors"><Clock size={14} /> RIWAYAT AKTIVITAS</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-10">
+            {history.length === 0 ? (
+              <div className="col-span-full text-center py-16 bg-white/40 dark:bg-slate-900/40 rounded-[40px] border border-white/40 shadow-sm transition-colors">
+                <p className="text-[10px] font-black uppercase tracking-widest text-green-900/30 dark:text-white/20">Belum ada data tes.</p>
+              </div>
+            ) : (
+              history.map((item) => (
+                <div key={item.id} className="flex flex-col p-6 rounded-[35px] border border-white/50 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md shadow-sm transition-colors">
                   <div className="flex justify-between items-start mb-4">
-                    <div><p className="text-[9px] text-green-600 font-black uppercase mb-1">{item.date}</p><p className="font-bold text-sm">Level: <span className={item.level === "Tinggi" ? "text-red-500" : "text-green-600"}>{item.level}</span></p></div>
+                    <div>
+                      <p className="text-[9px] text-green-600 dark:text-green-400 font-black uppercase mb-1">{item.date}</p>
+                      <p className="font-bold text-sm dark:text-slate-200">Level: <span className={item.level === "Tinggi" ? "text-red-500" : "text-green-600"}>{item.level}</span></p>
+                    </div>
                     <button onClick={() => setHistory(history.filter(h => h.id !== item.id))} className="text-red-400 hover:text-red-600 transition-colors"><Trash2 size={18} /></button>
                   </div>
-                  <div className="mt-auto bg-green-100 dark:bg-green-900/30 px-4 py-2 rounded-xl text-[10px] font-black text-green-700 text-center shadow-sm">Skor: {item.score}</div>
+                  <div className="mt-auto bg-green-100 dark:bg-green-900/30 px-4 py-2 rounded-xl text-[10px] font-black text-green-700 dark:text-green-400 text-center shadow-sm">Skor: {item.score}</div>
                 </div>
-            )))}
+              ))
+            )}
           </div>
         </div>
-      </Layout>
-    );
-  }
+      )}
 
-  if (viewMode === "quiz") {
-    return (
-      <Layout navigate={navigate} handleLogout={handleLogout}>
-        <div className="max-w-3xl mx-auto py-10">
-          <button onClick={() => setViewMode("home")} className="mb-6 text-green-700 dark:text-green-400 font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:translate-x-[-4px] transition-transform"><ChevronLeft size={16} /> Kembali</button>
+      {/* 2. TAMPILAN KUESIONER (QUIZ) */}
+      {viewMode === "quiz" && (
+        <div className="max-w-3xl mx-auto py-10 animate-in slide-in-from-bottom-5">
+          <button onClick={() => setViewMode("home")} className="mb-6 text-green-700 dark:text-green-400 font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:translate-x-[-4px] transition-transform">
+            <ChevronLeft size={16} /> Kembali
+          </button>
+          
           <div className="space-y-6">
             {questions.map((q, i) => (
-              <div key={q.id} className="bg-white/70 dark:bg-slate-900/80 backdrop-blur-md rounded-[30px] p-8 border border-white/40 shadow-sm">
-                <p className="text-sm font-bold text-green-950 dark:text-white mb-6 text-left">{q.id}. {q.question}</p>
-                <div className="flex justify-between px-2">
-                  {[4, 3, 2, 1, 0].map((v) => (
-                    <label key={v} className="flex flex-col items-center gap-2 cursor-pointer group">
-                      <input type="radio" name={`q-${i}`} className="hidden peer" onChange={() => setAnswers({...answers, [i]: v})} checked={answers[i] === v} />
-                      <div className="w-8 h-8 rounded-full border-2 border-green-200 peer-checked:bg-green-500 peer-checked:border-green-500 transition-all flex items-center justify-center text-white"><Check size={14} strokeWidth={4} className={answers[i] === v ? "block" : "hidden"} /></div>
-                      <span className="text-[8px] font-black uppercase text-green-900/40 dark:text-white/40 group-hover:text-green-600 transition-colors">
-                        {v === 4 ? "Selalu" : v === 0 ? "Tidak" : ""}
-                      </span>
-                    </label>
-                  ))}
+              <div key={q.id} className="bg-white/70 dark:bg-slate-900/80 backdrop-blur-md rounded-[30px] p-8 border border-white/40 shadow-sm transition-colors">
+                <p className="text-sm font-bold text-green-950 dark:text-white mb-8 text-left leading-relaxed">{q.id}. {q.question}</p>
+                <div className="flex justify-between items-start px-2">
+                  {[4, 3, 2, 1, 0].map((v) => {
+                    let label = v === 4 ? "Selalu" : v === 3 ? "Sering" : v === 2 ? "Kadang" : v === 1 ? "Jarang" : "Tidak";
+                    return (
+                      <label key={v} className="flex flex-col items-center gap-3 cursor-pointer group w-12">
+                        <input type="radio" name={`q-${i}`} className="hidden peer" onChange={() => setAnswers({...answers, [i]: v})} checked={answers[i] === v} />
+                        <div className="w-9 h-9 rounded-full border-2 border-green-200 dark:border-slate-700 peer-checked:bg-green-500 peer-checked:border-green-500 transition-all flex items-center justify-center text-white shadow-sm">
+                          {answers[i] === v ? <Check size={16} strokeWidth={4} /> : <span className="text-xs font-black text-green-900/30 dark:text-white/30 group-hover:text-green-600">{v}</span>}
+                        </div>
+                        <span className="text-[7px] font-black uppercase text-center leading-tight text-green-900/50 dark:text-white/40 tracking-tighter peer-checked:text-green-600 transition-colors">{label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             ))}
           </div>
+          
           <button 
             onClick={() => setViewMode("result")} 
             disabled={Object.keys(answers).length < questions.length} 
-            className={`w-full mt-10 py-5 rounded-2xl font-black text-xs shadow-xl transition-all ${Object.keys(answers).length < questions.length ? "bg-white/20 text-green-900/20" : "bg-green-600 text-white hover:scale-[1.02] active:scale-[0.98]"}`}
+            className={`w-full mt-10 py-5 rounded-2xl font-black text-xs shadow-xl transition-all ${Object.keys(answers).length < questions.length ? "bg-white/20 text-green-900/20 cursor-not-allowed" : "bg-green-600 text-white hover:scale-[1.02] active:scale-[0.98]"}`}
           >
             LIHAT HASIL TEST
           </button>
         </div>
-      </Layout>
-    );
-  }
+      )}
 
-  if (viewMode === "result") {
-    const result = getResult();
-    return (
-      <Layout navigate={navigate} handleLogout={handleLogout}>
-        <div className="max-w-2xl mx-auto py-10 text-center">
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[40px] py-12 border border-white/40 shadow-xl mb-8 flex flex-col items-center">
+      {/* 3. TAMPILAN HASIL (RESULT) */}
+      {viewMode === "result" && (
+        <div className="max-w-2xl mx-auto py-10 text-center animate-in zoom-in duration-500 pb-10">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[40px] py-12 border border-white/40 shadow-xl mb-6 flex flex-col items-center transition-colors">
+            <h2 className="text-[10px] font-black text-green-900/50 dark:text-white/50 mb-6 uppercase tracking-widest">Hasil Analisis</h2>
             <Gauge score={totalScore} />
-            <h3 className="text-2xl font-black text-green-600 mt-6 tracking-tight">{result.level}</h3>
-            <p className="px-10 mt-4 italic text-sm text-green-900/70 dark:text-slate-300">"{result.desc}"</p>
+            <h3 className="text-2xl font-black text-green-600 mt-6 tracking-tight">{getResult().level}</h3>
+            <p className="px-10 mt-4 italic text-sm text-green-900/70 dark:text-slate-300 transition-colors">"{getResult().desc}"</p>
           </div>
-          <button onClick={saveToHistory} className="w-full py-5 bg-green-600 text-white font-black text-xs rounded-2xl shadow-xl hover:bg-green-700 transition-all">SIMPAN & SELESAI</button>
+
+          {/* Bagian Saran */}
+          <div className="rounded-[40px] p-8 text-left bg-white/70 dark:bg-slate-900/80 backdrop-blur-md border border-white/40 shadow-xl mb-8 transition-colors">
+            <h3 className="font-black text-[10px] text-green-900/50 dark:text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+              <span className="w-6 h-0.5 bg-green-500"></span> SARAN UNTUKMU
+            </h3>
+            <ul className="space-y-4">
+              {getResult().tips.map((tip, i) => (
+                <li key={i} className="flex items-center gap-4 text-xs text-green-900 dark:text-slate-200 font-bold transition-colors">
+                  <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0"><Check size={12} strokeWidth={4} /></div>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <button onClick={saveToHistory} className="w-full py-5 bg-green-600 text-white font-black text-xs rounded-2xl shadow-xl hover:bg-green-700 transition-all active:scale-95 mb-10">SIMPAN & SELESAI</button>
         </div>
-      </Layout>
-    );
-  }
+      )}
+
+    </Layout>
+  );
 }
 
 export default Burnout;
