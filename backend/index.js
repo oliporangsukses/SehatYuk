@@ -2,11 +2,12 @@
 // IMPORT
 // =======================
 require("dotenv").config();
-const express = require('express');
-const cors = require('cors');
-const app = express();
-const db = require('./db');
+const express = require("express");
+const cors = require("cors");
 const bcrypt = require("bcrypt");
+const db = require("./db");
+
+const app = express();
 
 // =======================
 // MIDDLEWARE
@@ -15,37 +16,40 @@ app.use(cors());
 app.use(express.json());
 
 // =======================
-// CEK SERVER HIDUP
+// CEK SERVER
 // =======================
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send("Backend jalan!");
 });
 
 // =======================
-// BUAT TABEL (TANPA HAPUS DATA)
+// BUAT TABEL (AMAN)
 // =======================
-db.query(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nama_lengkap VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )
-`, (err) => {
+const createTableQuery = `
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nama_lengkap VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+`;
+
+db.query(createTableQuery, (err) => {
   if (err) {
-    console.log("Gagal buat tabel:", err);
+    console.log("❌ Gagal buat tabel:", err);
   } else {
-    console.log("Tabel users siap!");
+    console.log("✅ Tabel users siap!");
   }
 });
 
 // =======================
 // REGISTER
 // =======================
-app.post('/register', async (req, res) => {
+app.post("/register", async (req, res) => {
   const { nama_lengkap, email, password } = req.body;
 
+  // validasi input
   if (!nama_lengkap || !email || !password) {
     return res.status(400).json({ message: "Semua field wajib diisi!" });
   }
@@ -57,38 +61,46 @@ app.post('/register', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const sql = "INSERT INTO users (nama_lengkap, email, password) VALUES (?, ?, ?)";
+    const sql =
+      "INSERT INTO users (nama_lengkap, email, password) VALUES (?, ?, ?)";
 
     db.query(sql, [nama_lengkap, email, hashedPassword], (err, result) => {
       if (err) {
-        console.log("ERROR REGISTER:", err);
+        console.log("❌ ERROR REGISTER:", err);
+
+        // kalau email sudah dipakai
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(409).json({ message: "Email sudah terdaftar!" });
+        }
+
         return res.status(500).json({ message: "Gagal daftar" });
       }
 
-      res.json({ message: "Registrasi berhasil!" });
+      return res.status(201).json({ message: "Registrasi berhasil!" });
     });
-
   } catch (error) {
-    console.log("ERROR SERVER:", error);
-    res.status(500).json({ message: "Server error" });
+    console.log("❌ SERVER ERROR:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
 // =======================
 // LOGIN
 // =======================
-app.post('/login', (req, res) => {
+app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Email dan password wajib diisi!" });
+    return res
+      .status(400)
+      .json({ message: "Email dan password wajib diisi!" });
   }
 
   const sql = "SELECT * FROM users WHERE email = ?";
 
   db.query(sql, [email], async (err, result) => {
     if (err) {
-      console.log("ERROR LOGIN:", err);
+      console.log("❌ ERROR LOGIN:", err);
       return res.status(500).json({ message: "Terjadi error" });
     }
 
@@ -104,19 +116,19 @@ app.post('/login', (req, res) => {
       return res.status(401).json({ message: "Password salah!" });
     }
 
-    res.json({
+    return res.json({
       message: "Login berhasil!",
       user_id: user.id,
-      nama_lengkap: user.nama_lengkap
+      nama_lengkap: user.nama_lengkap,
     });
   });
 });
 
 // =======================
-// SERVER
+// SERVER START
 // =======================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log("Server jalan di port " + PORT);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server jalan di port ${PORT}`);
 });
