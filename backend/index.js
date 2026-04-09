@@ -1,6 +1,7 @@
 // =======================
 // IMPORT
 // =======================
+require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -14,12 +15,37 @@ app.use(cors());
 app.use(express.json());
 
 // =======================
-// REGISTER USER
+// CEK SERVER HIDUP
+// =======================
+app.get('/', (req, res) => {
+  res.send("Backend jalan!");
+});
+
+// =======================
+// BUAT TABEL (TANPA HAPUS DATA)
+// =======================
+db.query(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama_lengkap VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`, (err) => {
+  if (err) {
+    console.log("Gagal buat tabel:", err);
+  } else {
+    console.log("Tabel users siap!");
+  }
+});
+
+// =======================
+// REGISTER
 // =======================
 app.post('/register', async (req, res) => {
   const { nama_lengkap, email, password } = req.body;
 
-  // Validasi
   if (!nama_lengkap || !email || !password) {
     return res.status(400).json({ message: "Semua field wajib diisi!" });
   }
@@ -29,14 +55,13 @@ app.post('/register', async (req, res) => {
   }
 
   try {
-    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const sql = "INSERT INTO users (nama_lengkap, email, password) VALUES (?, ?, ?)";
 
     db.query(sql, [nama_lengkap, email, hashedPassword], (err, result) => {
       if (err) {
-        console.log(err);
+        console.log("ERROR REGISTER:", err);
         return res.status(500).json({ message: "Gagal daftar" });
       }
 
@@ -44,13 +69,13 @@ app.post('/register', async (req, res) => {
     });
 
   } catch (error) {
+    console.log("ERROR SERVER:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
 // =======================
-// LOGIN USER
+// LOGIN
 // =======================
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
@@ -63,6 +88,7 @@ app.post('/login', (req, res) => {
 
   db.query(sql, [email], async (err, result) => {
     if (err) {
+      console.log("ERROR LOGIN:", err);
       return res.status(500).json({ message: "Terjadi error" });
     }
 
@@ -86,86 +112,11 @@ app.post('/login', (req, res) => {
   });
 });
 
-
-// =======================
-// SIMPAN MOOD
-// =======================
-app.post('/mood', (req, res) => {
-  const { user_id, mood } = req.body;
-
-  if (!user_id || !mood) {
-    return res.status(400).json({ message: "Data tidak lengkap!" });
-  }
-
-  const today = new Date().toLocaleDateString('en-CA');
-
-  const sql = "INSERT INTO moods (user_id, mood, tanggal) VALUES (?, ?, ?)";
-
-  db.query(sql, [user_id, mood, today], (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ message: "Gagal simpan mood" });
-    }
-
-    res.json({ message: "Mood berhasil disimpan!" });
-  });
-});
-
-
-// =======================
-// AMBIL MOOD TERBARU
-// =======================
-app.get('/mood/:user_id', (req, res) => {
-  const { user_id } = req.params;
-
-  const sql = `
-    SELECT u.nama_lengkap AS nama, m.mood, m.tanggal
-    FROM moods m
-    JOIN users u ON m.user_id = u.id
-    WHERE m.user_id = ?
-    ORDER BY m.tanggal DESC, m.created_at DESC
-  `;
-
-  db.query(sql, [user_id], (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: "Error mengambil mood" });
-    }
-
-    res.json(result);
-  });
-});
-
-
-// =======================
-// RIWAYAT MOOD
-// =======================
-app.get('/moods/:user_id', (req, res) => {
-  const { user_id } = req.params;
-
-  const sql = `
-    SELECT u.nama_lengkap AS nama, m.mood,
-    DATE_FORMAT(m.tanggal, '%Y-%m-%d') AS tanggal
-    FROM moods m
-    JOIN users u ON m.user_id = u.id
-    WHERE m.user_id = ?
-    ORDER BY m.tanggal DESC, m.created_at DESC
-  `;
-
-  db.query(sql, [user_id], (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: "Error mengambil riwayat mood" });
-    }
-
-    res.json(result);
-  });
-});
-
-
 // =======================
 // SERVER
 // =======================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log("Server jalan di port " + PORT);
 });
