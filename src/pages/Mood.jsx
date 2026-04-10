@@ -69,6 +69,8 @@ function Mood() {
 
     setNote("");
     setSelectedScore(null);
+
+    
     alert("Mood berhasil disimpan! ✨");
   };
 
