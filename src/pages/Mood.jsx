@@ -44,7 +44,10 @@ function Mood() {
   const [note, setNote] = useState("");
   const [selectedScore, setSelectedScore] = useState(null);
 
-  const addMood = () => {
+  // ✅ TAMBAHAN (ambil userId dari login)
+  const userId = localStorage.getItem("userId");
+
+  const addMood = async () => {
     if (selectedScore === null) {
       alert("Pilih emoji mood dulu ya!");
       return;
@@ -52,6 +55,28 @@ function Mood() {
 
     const today = getTodayStr();
 
+    // =============================
+    // ✅ TAMBAHAN: KIRIM KE BACKEND
+    // =============================
+    try {
+      await fetch("https://sehatyuk-production.up.railway.app/mood", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          score: selectedScore,
+          note: note
+        })
+      });
+    } catch (error) {
+      console.log("Gagal kirim ke backend:", error);
+    }
+
+    // =============================
+    // ❗ INI KODE ASLI KAMU (TIDAK DIUBAH)
+    // =============================
     const updatedScores = { ...moodScores, [today]: selectedScore };
     setMoodScores(updatedScores);
     localStorage.setItem("user_moods_v3", JSON.stringify(updatedScores));
@@ -194,7 +219,7 @@ function Mood() {
             </div>
           </div>
 
-          {/* RIWAYAT CATATAN */}
+          {/* RIWAYAT */}
           <div className="p-6 rounded-[35px] shadow-lg border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-900/90 backdrop-blur-md">
             <h3 className="font-black text-[10px] text-green-800/50 dark:text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <History size={12} /> Catatan Terakhir
@@ -218,6 +243,7 @@ function Mood() {
               )}
             </div>
           </div>
+
         </div>
       </div>
 

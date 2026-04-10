@@ -23,9 +23,9 @@ app.get("/", (req, res) => {
 });
 
 // =======================
-// BUAT TABEL (AMAN)
+// BUAT TABEL USERS (AMAN)
 // =======================
-const createTableQuery = `
+const createUserTable = `
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nama_lengkap VARCHAR(100) NOT NULL,
@@ -35,11 +35,32 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `;
 
-db.query(createTableQuery, (err) => {
+db.query(createUserTable, (err) => {
   if (err) {
-    console.log("❌ Gagal buat tabel:", err);
+    console.log("❌ Gagal buat tabel users:", err);
   } else {
     console.log("✅ Tabel users siap!");
+  }
+});
+
+// =======================
+// BUAT TABEL MOODS (FIX)
+// =======================
+const createMoodTable = `
+CREATE TABLE IF NOT EXISTS moods (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  score INT,
+  note TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+`;
+
+db.query(createMoodTable, (err) => {
+  if (err) {
+    console.log("❌ Gagal buat tabel moods:", err);
+  } else {
+    console.log("✅ Tabel moods siap!");
   }
 });
 
@@ -49,7 +70,6 @@ db.query(createTableQuery, (err) => {
 app.post("/register", async (req, res) => {
   const { nama_lengkap, email, password } = req.body;
 
-  // validasi input
   if (!nama_lengkap || !email || !password) {
     return res.status(400).json({ message: "Semua field wajib diisi!" });
   }
@@ -64,11 +84,10 @@ app.post("/register", async (req, res) => {
     const sql =
       "INSERT INTO users (nama_lengkap, email, password) VALUES (?, ?, ?)";
 
-    db.query(sql, [nama_lengkap, email, hashedPassword], (err, result) => {
+    db.query(sql, [nama_lengkap, email, hashedPassword], (err) => {
       if (err) {
         console.log("❌ ERROR REGISTER:", err);
 
-        // kalau email sudah dipakai
         if (err.code === "ER_DUP_ENTRY") {
           return res.status(409).json({ message: "Email sudah terdaftar!" });
         }
@@ -109,7 +128,6 @@ app.post("/login", (req, res) => {
     }
 
     const user = result[0];
-
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -121,6 +139,48 @@ app.post("/login", (req, res) => {
       user_id: user.id,
       nama_lengkap: user.nama_lengkap,
     });
+  });
+});
+
+// =======================
+// TAMBAH MOOD (FIX)
+// =======================
+app.post("/mood", (req, res) => {
+  console.log("📥 DATA MASUK:", req.body);
+
+  const { user_id, score, note } = req.body;
+
+  if (!user_id || !score) {
+    return res.status(400).json({ message: "Data tidak lengkap!" });
+  }
+
+  const sql = "INSERT INTO moods (user_id, score, note) VALUES (?, ?, ?)";
+
+  db.query(sql, [user_id, score, note], (err) => {
+    if (err) {
+      console.log("❌ ERROR MOOD:", err);
+      return res.status(500).json({ message: "Gagal simpan mood" });
+    }
+
+    return res.status(201).json({ message: "Mood berhasil disimpan!" });
+  });
+});
+
+// =======================
+// AMBIL MOOD (RIWAYAT)
+// =======================
+app.get("/mood/:user_id", (req, res) => {
+  const { user_id } = req.params;
+
+  const sql = "SELECT * FROM moods WHERE user_id = ? ORDER BY created_at DESC";
+
+  db.query(sql, [user_id], (err, result) => {
+    if (err) {
+      console.log("❌ ERROR GET MOOD:", err);
+      return res.status(500).json({ message: "Gagal ambil data" });
+    }
+
+    return res.json(result);
   });
 });
 
