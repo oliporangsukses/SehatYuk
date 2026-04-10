@@ -125,6 +125,38 @@ app.post("/login", (req, res) => {
 });
 
 // =======================
+// RESET PASSWORD (TAMBAHAN)
+// =======================
+app.post("/reset-password", async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({ message: "Email dan password baru wajib diisi!" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const sql = "UPDATE users SET password = ? WHERE email = ?";
+
+    db.query(sql, [hashedPassword, email], (err, result) => {
+      if (err) {
+        console.log("❌ ERROR RESET PASSWORD:", err);
+        return res.status(500).json({ message: "Gagal update database" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Email tidak terdaftar!" });
+      }
+
+      return res.status(200).json({ message: "Password berhasil diperbarui!" });
+    });
+  } catch (error) {
+    console.log("❌ SERVER ERROR:", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
+});
+
+// =======================
 // SERVER START
 // =======================
 const PORT = process.env.PORT || 5000;
