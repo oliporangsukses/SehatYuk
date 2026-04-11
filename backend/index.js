@@ -134,6 +134,9 @@ app.post("/login", (req, res) => {
 
 
 // RESET PASSWORD
+// =======================
+// RESET PASSWORD (TAMBAHAN)
+// =======================
 app.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
 
