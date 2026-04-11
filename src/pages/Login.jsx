@@ -79,7 +79,7 @@ function Login() {
 
                 // SINKRON KE BACKEND
                 try {
-                  const response = await fetch("http://localhost:5000/reset-password", {
+                  const response = await fetch("https://sehatyuk-production.up.railway.app/reset-password", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email: userEmail, newPassword: pass }),
@@ -117,7 +117,7 @@ function Login() {
     });
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("https://sehatyuk-production.up.railway.app/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
