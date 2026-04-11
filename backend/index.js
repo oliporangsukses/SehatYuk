@@ -138,13 +138,13 @@ app.post("/login", (req, res) => {
       message: "Login berhasil!",
       user_id: user.id,
       nama_lengkap: user.nama_lengkap,
+      email: user.email
     });
   });
 });
 
 // =======================
-<<<<<<< HEAD
-// RESET PASSWORD (TAMBAHAN)
+// RESET PASSWORD
 // =======================
 app.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
@@ -173,8 +173,10 @@ app.post("/reset-password", async (req, res) => {
     console.log("❌ SERVER ERROR:", error);
     return res.status(500).json({ message: "Terjadi kesalahan server" });
   }
-=======
-// TAMBAH MOOD (FIX)
+});
+
+// =======================
+// TAMBAH MOOD
 // =======================
 app.post("/mood", (req, res) => {
   console.log("📥 DATA MASUK:", req.body);
@@ -198,7 +200,7 @@ app.post("/mood", (req, res) => {
 });
 
 // =======================
-// AMBIL MOOD (RIWAYAT)
+// AMBIL MOOD
 // =======================
 app.get("/mood/:user_id", (req, res) => {
   const { user_id } = req.params;
@@ -213,7 +215,6 @@ app.get("/mood/:user_id", (req, res) => {
 
     return res.json(result);
   });
->>>>>>> 12b4e04624db38c8ead7498a0e97531516c32700
 });
 
 // =======================
