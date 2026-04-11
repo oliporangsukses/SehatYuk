@@ -1,6 +1,4 @@
-// =======================
 // IMPORT
-// =======================
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -9,22 +7,18 @@ const db = require("./db");
 
 const app = express();
 
-// =======================
 // MIDDLEWARE
-// =======================
 app.use(cors());
 app.use(express.json());
 
-// =======================
+
 // CEK SERVER
-// =======================
 app.get("/", (req, res) => {
   res.send("Backend jalan!");
 });
 
-// =======================
-// BUAT TABEL USERS (AMAN)
-// =======================
+
+// BUAT TABEL USERS 
 const createUserTable = `
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,9 +37,8 @@ db.query(createUserTable, (err) => {
   }
 });
 
-// =======================
-// BUAT TABEL MOODS (FIX)
-// =======================
+
+// BUAT TABEL MOODS 
 const createMoodTable = `
 CREATE TABLE IF NOT EXISTS moods (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -64,9 +57,7 @@ db.query(createMoodTable, (err) => {
   }
 });
 
-// =======================
 // REGISTER
-// =======================
 app.post("/register", async (req, res) => {
   const { nama_lengkap, email, password } = req.body;
 
@@ -103,9 +94,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// =======================
 // LOGIN
-// =======================
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -143,9 +132,8 @@ app.post("/login", (req, res) => {
   });
 });
 
-// =======================
+
 // RESET PASSWORD
-// =======================
 app.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
 
@@ -175,9 +163,7 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
-// =======================
 // TAMBAH MOOD
-// =======================
 app.post("/mood", (req, res) => {
   console.log("📥 DATA MASUK:", req.body);
 
@@ -199,9 +185,7 @@ app.post("/mood", (req, res) => {
   });
 });
 
-// =======================
 // AMBIL MOOD
-// =======================
 app.get("/mood/:user_id", (req, res) => {
   const { user_id } = req.params;
 
@@ -217,9 +201,7 @@ app.get("/mood/:user_id", (req, res) => {
   });
 });
 
-// =======================
 // SERVER START
-// =======================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {

@@ -44,7 +44,7 @@ function Mood() {
   const [note, setNote] = useState("");
   const [selectedScore, setSelectedScore] = useState(null);
 
-  // ✅ TAMBAHAN (ambil userId dari login)
+  //(ambil userId dari login)
   const userId = localStorage.getItem("userId");
 
   const addMood = async () => {
@@ -55,9 +55,6 @@ function Mood() {
 
     const today = getTodayStr();
 
-    // =============================
-    // ✅ TAMBAHAN: KIRIM KE BACKEND
-    // =============================
     try {
       await fetch("https://sehatyuk-production.up.railway.app/mood", {
         method: "POST",
@@ -74,9 +71,6 @@ function Mood() {
       console.log("Gagal kirim ke backend:", error);
     }
 
-    // =============================
-    // ❗ INI KODE ASLI KAMU (TIDAK DIUBAH)
-    // =============================
     const updatedScores = { ...moodScores, [today]: selectedScore };
     setMoodScores(updatedScores);
     localStorage.setItem("user_moods_v3", JSON.stringify(updatedScores));
