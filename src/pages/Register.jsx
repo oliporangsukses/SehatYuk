@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import bgDaun from "../assets/bgDaun.jpeg"
 import Swal from "sweetalert2"
+import { Eye, EyeOff } from "lucide-react" // ✅ TAMBAHAN
 
 function Register() {
   const navigate = useNavigate()
@@ -9,6 +10,7 @@ function Register() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false) // ✅ TAMBAHAN
 
   const handleRegister = async (e) => {
     e.preventDefault()
@@ -23,7 +25,6 @@ function Register() {
       return
     }
 
-    // LOADING
     Swal.fire({
       title: "Mendaftarkan Akun...",
       html: "Sedang menyiapkan ruang untuk Anda. ✨",
@@ -144,14 +145,25 @@ function Register() {
                 className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
               />
 
-              <input
-                type="password"
-                placeholder="Password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
-              />
+              {/* PASSWORD + 👁️ */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-4 pr-12 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all shadow-sm"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-green-600"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
 
               <button 
                 type="submit"

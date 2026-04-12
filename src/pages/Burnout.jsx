@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 import bgMoodPage from "../assets/MoodBackground.jpeg"; 
 
-// --- 1. DATA PERTANYAAN ---
+//DATA PERTANYAAN 
 const questions = [
   { id: 1, question: "Saya merasa lelah secara emosional karena pekerjaan atau aktivitas sehari-hari." },
   { id: 2, question: "Saya merasa kehilangan motivasi untuk melakukan aktivitas yang biasanya saya sukai." },
@@ -16,7 +16,7 @@ const questions = [
   { id: 8, question: "Saya merasa tertekan dengan tanggung jawab yang ada." }
 ];
 
-// --- 2. KOMPONEN LAYOUT ---
+//KOMPONEN LAYOUT 
 const Layout = ({ children, navigate, handleLogout }) => (
   <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex justify-center items-start overflow-x-hidden transition-colors duration-500">
     <div className="w-full min-h-screen bg-cover bg-center bg-fixed flex flex-col font-sans relative shadow-2xl"
@@ -42,7 +42,7 @@ const Layout = ({ children, navigate, handleLogout }) => (
   </div>
 );
 
-// --- 3. KOMPONEN GAUGE SKOR ---
+//KOMPONEN GAUGE SKOR 
 const Gauge = ({ score }) => {
   const max = 32;
   const percentage = Math.min(score / max, 1);
@@ -73,7 +73,7 @@ const Gauge = ({ score }) => {
   );
 };
 
-// --- 4. KOMPONEN UTAMA (BURNOUT) ---
+//KOMPONEN UTAMA (BURNOUT) 
 function Burnout() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("home");
@@ -112,7 +112,7 @@ function Burnout() {
     setViewMode("home");
   };
 
-  // --- RENDERING TAMPILAN ---
+  //RENDERING TAMPILAN
   return (
     <Layout navigate={navigate} handleLogout={handleLogout}>
       
@@ -153,7 +153,7 @@ function Burnout() {
         </div>
       )}
 
-      {/* 2. TAMPILAN KUESIONER (QUIZ) */}
+      {/*TAMPILAN KUESIONER (QUIZ)*/}
       {viewMode === "quiz" && (
         <div className="max-w-3xl mx-auto py-10 animate-in slide-in-from-bottom-5">
           <button onClick={() => setViewMode("home")} className="mb-6 text-green-700 dark:text-green-400 font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:translate-x-[-4px] transition-transform">
@@ -192,7 +192,7 @@ function Burnout() {
         </div>
       )}
 
-      {/* 3. TAMPILAN HASIL (RESULT) */}
+      {/*TAMPILAN HASIL (RESULT)*/}
       {viewMode === "result" && (
         <div className="max-w-2xl mx-auto py-10 text-center animate-in zoom-in duration-500 pb-10">
           <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[40px] py-12 border border-white/40 shadow-xl mb-6 flex flex-col items-center transition-colors">

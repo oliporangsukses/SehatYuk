@@ -1,6 +1,4 @@
-// =======================
 // IMPORT
-// =======================
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -9,22 +7,24 @@ const db = require("./db");
 
 const app = express();
 
-// =======================
 // MIDDLEWARE
-// =======================
 app.use(cors());
 app.use(express.json());
 
-// =======================
+
 // CEK SERVER
-// =======================
 app.get("/", (req, res) => {
   res.send("Backend jalan!");
 });
 
+<<<<<<< HEAD
 // =======================
 // USERS TABLE
 // =======================
+=======
+
+// BUAT TABEL USERS 
+>>>>>>> 096f345d60ef8a8596e8ba4b8b66c8b808bba1dd
 const createUserTable = `
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,9 +37,14 @@ CREATE TABLE IF NOT EXISTS users (
 `;
 db.query(createUserTable);
 
+<<<<<<< HEAD
 // =======================
 // MOODS TABLE (SESUAI XAMPP KAMU)
 // =======================
+=======
+
+// BUAT TABEL MOODS 
+>>>>>>> 096f345d60ef8a8596e8ba4b8b66c8b808bba1dd
 const createMoodTable = `
 CREATE TABLE IF NOT EXISTS moods (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -51,9 +56,7 @@ CREATE TABLE IF NOT EXISTS moods (
 `;
 db.query(createMoodTable);
 
-// =======================
 // REGISTER
-// =======================
 app.post("/register", async (req, res) => {
   const { nama_lengkap, email, password } = req.body;
 
@@ -87,9 +90,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// =======================
 // LOGIN
-// =======================
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -122,11 +123,39 @@ app.post("/login", (req, res) => {
         photo: user.photo || null
       });
     }
+<<<<<<< HEAD
   );
+=======
+
+    if (result.length === 0) {
+      return res.status(401).json({ message: "Email tidak ditemukan!" });
+    }
+
+    const user = result[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Password salah!" });
+    }
+
+    return res.json({
+      message: "Login berhasil!",
+      user_id: user.id,
+      nama_lengkap: user.nama_lengkap,
+      email: user.email
+    });
+  });
+>>>>>>> 096f345d60ef8a8596e8ba4b8b66c8b808bba1dd
 });
 
-// =======================
+
 // RESET PASSWORD
+// =======================
+<<<<<<< HEAD
+// RESET PASSWORD
+=======
+// RESET PASSWORD (TAMBAHAN)
+>>>>>>> 096f345d60ef8a8596e8ba4b8b66c8b808bba1dd
 // =======================
 app.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
@@ -156,9 +185,13 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // =======================
 // SAVE MOOD (FIX FINAL)
 // =======================
+=======
+// TAMBAH MOOD
+>>>>>>> 096f345d60ef8a8596e8ba4b8b66c8b808bba1dd
 app.post("/mood", (req, res) => {
   const { user_id, mood, note } = req.body;
 
@@ -177,6 +210,7 @@ app.post("/mood", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 
 // =======================
 // UPDATE PROFILE 
@@ -204,6 +238,9 @@ app.post("/update-profile", (req, res) => {
 // =======================
 // GET MOOD 7 HARI
 // =======================
+=======
+// AMBIL MOOD
+>>>>>>> 096f345d60ef8a8596e8ba4b8b66c8b808bba1dd
 app.get("/mood/:user_id", (req, res) => {
   const { user_id } = req.params;
 
@@ -223,12 +260,21 @@ app.get("/mood/:user_id", (req, res) => {
 
       res.json(result);
     }
+<<<<<<< HEAD
   );
 });
 
 // =======================
 // START SERVER
 // =======================
+=======
+
+    return res.json(result);
+  });
+});
+
+// SERVER START
+>>>>>>> 096f345d60ef8a8596e8ba4b8b66c8b808bba1dd
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
