@@ -55,24 +55,27 @@ function Mood() {
 
     const today = getTodayStr();
 
+    console.log("USER ID:", userId);
+    console.log("SCORE:", selectedScore);
+    console.log("NOTE:", note);
+
     // =============================
     // ✅ TAMBAHAN: KIRIM KE BACKEND
     // =============================
     try {
-      await fetch("https://sehatyuk-production.up.railway.app/mood", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          score: selectedScore,
-          note: note
-        })
-      });
-    } catch (error) {
-      console.log("Gagal kirim ke backend:", error);
-    }
+  await fetch("http://localhost:5000/mood", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+   body: JSON.stringify({
+  user_id: userId,
+  mood: ["😡","😢","😐","🙂","😊"][selectedScore]
+})
+  });
+} catch (error) {
+  console.log("Gagal kirim ke backend:", error);
+}
 
     // =============================
     // ❗ INI KODE ASLI KAMU (TIDAK DIUBAH)

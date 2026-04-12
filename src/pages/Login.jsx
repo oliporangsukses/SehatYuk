@@ -125,13 +125,25 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("userName", data.nama_lengkap);
-        localStorage.setItem("userId", data.user_id);
-        localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem("userName", data.name);
+  localStorage.setItem("userEmail", data.email);
+  localStorage.setItem("userId", data.id);
+  const oldPhoto = localStorage.getItem("profilePic");
+
+const defaultAvatar = `https://ui-avatars.com/api/?name=${data.name}&background=16a34a&color=ffffff`;
+
+localStorage.setItem(
+  "profilePic",
+  data.photo || oldPhoto || defaultAvatar
+);
+
+
+  console.log("LOGIN DATA:", data); // debug
         Swal.fire({
           icon: "success",
           title: "Login Berhasil!",
-          text: `Selamat datang kembali, ${data.nama_lengkap}!`,
+          text: `Selamat datang kembali, ${data.name}!`,
           showConfirmButton: false,
           timer: 1500,
         }).then(() => { navigate("/"); });

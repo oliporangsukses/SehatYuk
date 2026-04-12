@@ -15,7 +15,10 @@ function Profile() {
   // --- STATE UTAMA ---
   const [userName, setUserName] = useState(localStorage.getItem("userName") || "Pengguna");
   const [userEmail] = useState(localStorage.getItem("userEmail") || "email@sehatyuk.com");
-  const [profilePic, setProfilePic] = useState(localStorage.getItem("profilePic") || "https://i.pravatar.cc/150");
+  const [profilePic, setProfilePic] = useState(
+  localStorage.getItem("profilePic") || 
+  "https://ui-avatars.com/api/?name=User&background=16a34a&color=ffffff"
+);
   
   // --- STATE SETTINGS ---
   const [showSettings, setShowSettings] = useState(false);
@@ -48,22 +51,55 @@ function Profile() {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePic(reader.result);
-        localStorage.setItem("profilePic", reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      setProfilePic(reader.result);
+      localStorage.setItem("profilePic", reader.result);
 
-  const saveName = () => {
-    setUserName(tempName);
-    localStorage.setItem("userName", tempName);
-    setIsEditing(false);
-  };
+      try {
+        await fetch("http://localhost:5000/update-profile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            user_id: localStorage.getItem("userId"),
+            name: userName,
+            photo: reader.result
+          })
+        });
+      } catch (err) {
+        console.log("Gagal upload foto:", err);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+ const saveName = async () => {
+  setUserName(tempName);
+  localStorage.setItem("userName", tempName);
+
+  try {
+    await fetch("http://localhost:5000/update-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        user_id: localStorage.getItem("userId"),
+        name: tempName,
+        photo: profilePic
+      })
+    });
+  } catch (err) {
+    console.log("Gagal update profile:", err);
+  }
+
+  setIsEditing(false);
+};
 
   const handleResetData = () => {
     if (window.confirm("Hapus semua riwayat Mood dan Burnout? Data tidak bisa dikembalikan.")) {
