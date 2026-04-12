@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import bgDaun from "../assets/bgDaun.jpeg";
 import Swal from "sweetalert2";
+import { Eye, EyeOff } from "lucide-react";
 
 function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleForgotPassword = () => {
-    // 1. Generate kode random (hanya muncul di Step 3)
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-    // Step 1: Input Email
     Swal.fire({
       title: "Lupa Kata Sandi?",
       text: "Masukkan email terdaftar Anda",
@@ -26,7 +26,6 @@ function Login() {
       if (result.isConfirmed && result.value) {
         const userEmail = result.value;
 
-        // Step 2: Tampilan Loading
         Swal.fire({
           title: "Mengirim Kode...",
           html: "Mohon tunggu sebentar, sedang memproses permintaan Anda.",
@@ -36,7 +35,6 @@ function Login() {
           },
           timer: 2000,
         }).then(() => {
-          // Step 3: Kasih tahu kodenya (HANYA SEKALI DI SINI)
           Swal.fire({
             icon: "success",
             title: "Kode Terkirim!",
@@ -44,7 +42,6 @@ function Login() {
             confirmButtonText: "Atur Ulang Password",
             confirmButtonColor: "#16a34a",
           }).then(() => {
-            // Step 4: Form Reset dengan Konfirmasi Kata Sandi
             Swal.fire({
               title: "Atur Ulang Kata Sandi",
               html: `
@@ -63,7 +60,6 @@ function Login() {
                 const pass = document.getElementById("swal-input-pass").value;
                 const confirm = document.getElementById("swal-input-confirm").value;
 
-                // Validasi Frontend
                 if (code !== randomCode) {
                   Swal.showValidationMessage("Kode verifikasi salah!");
                   return false;
@@ -77,7 +73,6 @@ function Login() {
                   return false;
                 }
 
-                // SINKRON KE BACKEND
                 try {
                   const response = await fetch("https://sehatyuk-production.up.railway.app/reset-password", {
                     method: "POST",
@@ -147,7 +142,7 @@ function Login() {
     <div className="flex items-center justify-center min-h-screen bg-green-50 p-4 md:p-10 font-sans w-full overflow-x-hidden">
       <div className="flex flex-col md:flex-row w-full max-w-5xl h-auto md:h-[600px] bg-white rounded-[40px] md:rounded-[60px] shadow-2xl overflow-hidden border border-white/50">
         
-        {/* SISI KIRI: INFORMASI */}
+        {/* SISI KIRI */}
         <div 
           className="hidden md:flex md:w-1/2 bg-cover bg-center relative p-12 flex-col justify-between text-white"
           style={{ backgroundImage: `url(${bgDaun})` }}
@@ -168,7 +163,7 @@ function Login() {
           </div>
         </div>
 
-        {/* SISI KANAN: FORM LOGIN */}
+        {/* SISI KANAN */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-16 bg-white relative">
           <div className="w-full max-w-sm">
             <div className="md:hidden flex flex-col items-center mb-10">
@@ -189,15 +184,28 @@ function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all"
               />
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-4 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all"
-                />
+
+              {/* FIX PASSWORD */}
+              <div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-4 pr-12 border border-green-100 rounded-[25px] bg-green-50/30 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white text-sm transition-all"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-5 flex items-center text-green-600"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+
                 <div className="flex justify-end mt-3 px-2">
                   <button 
                     type="button" 
@@ -208,6 +216,7 @@ function Login() {
                   </button>
                 </div>
               </div>
+
               <button 
                 type="submit"
                 className="w-full bg-green-600 text-white p-5 rounded-[25px] hover:bg-green-700 transition-all font-black shadow-xl active:scale-95 mt-6 text-xs tracking-[0.2em]"
