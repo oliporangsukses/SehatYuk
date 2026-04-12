@@ -48,6 +48,22 @@ db.connect((err) => {
     db.query(createUserTable, (err) => {
       if (err) console.log("❌ Error create users:", err);
       else console.log("✅ Table users siap");
+
+      // =======================
+      // FIX RESET TOKEN (ANTI ERROR)
+      // =======================
+      const fixResetToken = `
+        ALTER TABLE users 
+        MODIFY reset_token VARCHAR(255) NULL
+      `;
+
+      db.query(fixResetToken, (err) => {
+        if (err) {
+          console.log("⚠️ reset_token belum ada / sudah aman");
+        } else {
+          console.log("✅ reset_token berhasil diperbaiki");
+        }
+      });
     });
 
     // =======================
@@ -90,11 +106,13 @@ app.post("/register", async (req, res) => {
       [nama_lengkap, email, hashedPassword],
       (err) => {
         if (err) {
+          console.log("REGISTER ERROR:", err);
+
           if (err.code === "ER_DUP_ENTRY") {
             return res.status(409).json({ message: "Email sudah terdaftar!" });
           }
-          console.log(err);
-          return res.status(500).json({ message: "Gagal daftar" });
+
+          return res.status(500).json({ message: err.message });
         }
 
         return res.status(201).json({ message: "Registrasi berhasil!" });
