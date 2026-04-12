@@ -50,7 +50,7 @@ db.connect((err) => {
       else console.log("✅ Table users siap");
 
       // =======================
-      // FIX RESET TOKEN (ANTI ERROR)
+      // FIX RESET TOKEN
       // =======================
       const fixResetToken = `
         ALTER TABLE users 
@@ -58,11 +58,21 @@ db.connect((err) => {
       `;
 
       db.query(fixResetToken, (err) => {
-        if (err) {
-          console.log("⚠️ reset_token belum ada / sudah aman");
-        } else {
-          console.log("✅ reset_token berhasil diperbaiki");
-        }
+        if (err) console.log("⚠️ reset_token aman / belum ada");
+        else console.log("✅ reset_token berhasil diperbaiki");
+      });
+
+      // =======================
+      // FIX PHOTO
+      // =======================
+      const fixPhoto = `
+        ALTER TABLE users 
+        MODIFY photo LONGTEXT NULL
+      `;
+
+      db.query(fixPhoto, (err) => {
+        if (err) console.log("⚠️ photo sudah aman");
+        else console.log("✅ photo berhasil diperbaiki");
       });
     });
 
