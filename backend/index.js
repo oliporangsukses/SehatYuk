@@ -1,4 +1,6 @@
+// =======================
 // IMPORT
+// =======================
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -7,46 +9,94 @@ const db = require("./db");
 
 const app = express();
 
+// =======================
 // MIDDLEWARE
+// =======================
 app.use(cors());
 app.use(express.json());
 
+// =======================
 // CEK SERVER
+// =======================
 app.get("/", (req, res) => {
   res.send("Backend jalan!");
 });
 
 // =======================
-// CREATE TABLE USERS
+// CONNECT DATABASE + CREATE TABLE
 // =======================
-const createUserTable = `
-CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nama_lengkap VARCHAR(100) NOT NULL,
-  email VARCHAR(100) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  photo LONGTEXT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-`;
+db.connect((err) => {
+  if (err) {
+    console.log("❌ Database gagal connect:", err);
+  } else {
+    console.log("✅ Database terhubung");
 
-db.query(createUserTable);
+    // =======================
+    // CREATE TABLE USERS
+    // =======================
+    const createUserTable = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      nama_lengkap VARCHAR(100) NOT NULL,
+      email VARCHAR(100) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      photo LONGTEXT,
+      created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+    )
+    `;
 
-// =======================
-// CREATE TABLE MOODS
-// =======================
-const createMoodTable = `
-CREATE TABLE IF NOT EXISTS moods (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
-  mood VARCHAR(10),
-  note TEXT,
-  tanggal DATE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-`;
+    db.query(createUserTable, (err) => {
+      if (err) console.log("❌ Error create users:", err);
+      else console.log("✅ Table users siap");
 
-db.query(createMoodTable);
+      // =======================
+      // FIX RESET TOKEN
+      // =======================
+      const fixResetToken = `
+        ALTER TABLE users 
+        MODIFY reset_token VARCHAR(255) NULL
+      `;
+
+      db.query(fixResetToken, (err) => {
+        if (err) console.log("⚠️ reset_token aman / belum ada");
+        else console.log("✅ reset_token berhasil diperbaiki");
+      });
+
+      // =======================
+      // FIX PHOTO
+      // =======================
+      const fixPhoto = `
+        ALTER TABLE users 
+        MODIFY photo LONGTEXT NULL
+      `;
+
+      db.query(fixPhoto, (err) => {
+        if (err) console.log("⚠️ photo sudah aman");
+        else console.log("✅ photo berhasil diperbaiki");
+      });
+    });
+
+    // =======================
+    // CREATE TABLE MOODS
+    // =======================
+    const createMoodTable = `
+    CREATE TABLE IF NOT EXISTS moods (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT,
+      mood VARCHAR(10),
+      note TEXT,
+      tanggal DATE,
+      created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+    `;
+
+    db.query(createMoodTable, (err) => {
+      if (err) console.log("❌ Error create moods:", err);
+      else console.log("✅ Table moods siap");
+    });
+  }
+});
 
 // =======================
 // REGISTER
@@ -66,16 +116,20 @@ app.post("/register", async (req, res) => {
       [nama_lengkap, email, hashedPassword],
       (err) => {
         if (err) {
+          console.log("REGISTER ERROR:", err);
+
           if (err.code === "ER_DUP_ENTRY") {
             return res.status(409).json({ message: "Email sudah terdaftar!" });
           }
-          return res.status(500).json({ message: "Gagal daftar" });
+
+          return res.status(500).json({ message: err.message });
         }
 
         return res.status(201).json({ message: "Registrasi berhasil!" });
       }
     );
   } catch (err) {
+    console.log(err);
     return res.status(500).json({ message: "Server error" });
   }
 });
@@ -95,6 +149,7 @@ app.post("/login", (req, res) => {
     [email],
     async (err, result) => {
       if (err) {
+        console.log(err);
         return res.status(500).json({ message: "Terjadi error server" });
       }
 
@@ -114,7 +169,7 @@ app.post("/login", (req, res) => {
         id: user.id,
         name: user.nama_lengkap,
         email: user.email,
-        photo: user.photo || null
+        photo: user.photo || null,
       });
     }
   );
@@ -126,15 +181,13 @@ app.post("/login", (req, res) => {
 app.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
 
-  console.log("RESET BODY:", req.body);
-
   if (!email || !newPassword) {
     return res.status(400).json({ message: "Data tidak lengkap" });
   }
 
   db.query("SELECT * FROM users WHERE email = ?", [email], async (err, rows) => {
     if (err) {
-      console.log("SELECT ERROR:", err);
+      console.log(err);
       return res.status(500).json({ message: err.message });
     }
 
@@ -147,13 +200,11 @@ app.post("/reset-password", async (req, res) => {
     db.query(
       "UPDATE users SET password = ? WHERE email = ?",
       [hashedPassword, email],
-      (err, result) => {
+      (err) => {
         if (err) {
-          console.log("UPDATE ERROR:", err);
+          console.log(err);
           return res.status(500).json({ message: err.message });
         }
-
-        console.log("UPDATE SUCCESS:", result);
 
         return res.json({ message: "Password berhasil diupdate" });
       }
@@ -174,6 +225,7 @@ app.post("/mood", (req, res) => {
 
   db.query(sql, [user_id, mood, note], (err) => {
     if (err) {
+      console.log(err);
       return res.status(500).json({ message: "Gagal simpan mood" });
     }
 
@@ -198,6 +250,7 @@ app.get("/mood/:user_id", (req, res) => {
     [user_id],
     (err, result) => {
       if (err) {
+        console.log(err);
         return res.status(500).json({ message: "Gagal ambil data mood" });
       }
 

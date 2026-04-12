@@ -63,7 +63,7 @@ function Mood() {
     // ✅ TAMBAHAN: KIRIM KE BACKEND
     // =============================
     try {
-  await fetch("http://localhost:5000/mood", {
+  await fetch("https://sehatyuk-production.up.railway.app/mood", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
