@@ -116,7 +116,7 @@ function Burnout() {
   return (
     <Layout navigate={navigate} handleLogout={handleLogout}>
       
-      {/* 1. TAMPILAN AWAL (DASHBOARD) */}
+      {/* 1. TAMPILAN AWAL (HOME) */}
       {viewMode === "home" && (
         <div className="mt-8 md:mt-12 max-w-5xl mx-auto animate-in fade-in duration-700">
           <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[40px] p-8 md:p-12 mb-8 border border-white/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 transition-colors">
