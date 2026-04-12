@@ -59,7 +59,7 @@ function Profile() {
       localStorage.setItem("profilePic", reader.result);
 
       try {
-        await fetch("http://localhost:5000/update-profile", {
+        await fetch("https://sehatyuk-production.up.railway.app/update-profile", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -83,7 +83,7 @@ function Profile() {
   localStorage.setItem("userName", tempName);
 
   try {
-    await fetch("http://localhost:5000/update-profile", {
+    await fetch("https://sehatyuk-production.up.railway.app/update-profile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
