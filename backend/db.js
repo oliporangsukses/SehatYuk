@@ -10,13 +10,14 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.error("❌ Koneksi database gagal:");
-    console.error(err);
-  } else {
-    console.log("✅ Koneksi database berhasil!");
-    console.log("🔥 HOST: localhost");
-    console.log("🔥 DATABASE: sehatyuk_db");
+    console.error("❌ Koneksi database gagal!");
+    console.error("Detail error:", err.message);
+    return;
   }
+
+  console.log("✅ Database berhasil terhubung!");
+  console.log("📦 Database: sehatyuk_db");
+  console.log("📍 Host: localhost");
 });
 
 module.exports = db;

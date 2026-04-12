@@ -34,15 +34,16 @@ function ResetPassword() {
 
     try {
       // Ganti URL sesuai endpoint backend kamu untuk reset password
-      const response = await fetch("https://sehatyuk-production.up.railway.app/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          password,
-        }),
-      });
+      const response = await fetch("http://localhost:5000/reset-password", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    email: localStorage.getItem("userEmail"),
+    newPassword: password,
+  }),
+});
 
       const data = await response.json();
 

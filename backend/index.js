@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 });
 
 // =======================
-// USERS TABLE
+// CREATE TABLE USERS
 // =======================
 const createUserTable = `
 CREATE TABLE IF NOT EXISTS users (
@@ -29,23 +29,28 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 `;
+
 db.query(createUserTable);
 
 // =======================
-// MOODS TABLE
+// CREATE TABLE MOODS
 // =======================
 const createMoodTable = `
 CREATE TABLE IF NOT EXISTS moods (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
   mood VARCHAR(10),
+  note TEXT,
   tanggal DATE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 `;
+
 db.query(createMoodTable);
 
+// =======================
 // REGISTER
+// =======================
 app.post("/register", async (req, res) => {
   const { nama_lengkap, email, password } = req.body;
 
@@ -70,12 +75,14 @@ app.post("/register", async (req, res) => {
         return res.status(201).json({ message: "Registrasi berhasil!" });
       }
     );
-  } catch {
+  } catch (err) {
     return res.status(500).json({ message: "Server error" });
   }
 });
 
+// =======================
 // LOGIN
+// =======================
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -87,7 +94,9 @@ app.post("/login", (req, res) => {
     "SELECT * FROM users WHERE email = ?",
     [email],
     async (err, result) => {
-      if (err) return res.status(500).json({ message: "Terjadi error" });
+      if (err) {
+        return res.status(500).json({ message: "Terjadi error server" });
+      }
 
       if (result.length === 0) {
         return res.status(401).json({ message: "Email tidak ditemukan!" });
@@ -111,36 +120,50 @@ app.post("/login", (req, res) => {
   );
 });
 
+// =======================
 // RESET PASSWORD
+// =======================
 app.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
 
+  console.log("RESET BODY:", req.body);
+
   if (!email || !newPassword) {
-    return res.status(400).json({ message: "Email dan password baru wajib diisi!" });
+    return res.status(400).json({ message: "Data tidak lengkap" });
   }
 
-  try {
+  db.query("SELECT * FROM users WHERE email = ?", [email], async (err, rows) => {
+    if (err) {
+      console.log("SELECT ERROR:", err);
+      return res.status(500).json({ message: err.message });
+    }
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Email tidak ditemukan" });
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     db.query(
       "UPDATE users SET password = ? WHERE email = ?",
       [hashedPassword, email],
       (err, result) => {
-        if (err) return res.status(500).json({ message: "Gagal update database" });
-
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ message: "Email tidak terdaftar!" });
+        if (err) {
+          console.log("UPDATE ERROR:", err);
+          return res.status(500).json({ message: err.message });
         }
 
-        return res.json({ message: "Password berhasil diperbarui!" });
+        console.log("UPDATE SUCCESS:", result);
+
+        return res.json({ message: "Password berhasil diupdate" });
       }
     );
-  } catch {
-    return res.status(500).json({ message: "Server error" });
-  }
+  });
 });
 
+// =======================
 // SAVE MOOD
+// =======================
 app.post("/mood", (req, res) => {
   const { user_id, mood, note } = req.body;
 
@@ -158,7 +181,9 @@ app.post("/mood", (req, res) => {
   });
 });
 
+// =======================
 // GET MOOD 7 HARI
+// =======================
 app.get("/mood/:user_id", (req, res) => {
   const { user_id } = req.params;
 
@@ -176,14 +201,16 @@ app.get("/mood/:user_id", (req, res) => {
         return res.status(500).json({ message: "Gagal ambil data mood" });
       }
 
-      res.json(result);
+      return res.json(result);
     }
   );
 });
 
+// =======================
 // START SERVER
+// =======================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, () => {
   console.log(`🚀 Server jalan di port ${PORT}`);
 });
